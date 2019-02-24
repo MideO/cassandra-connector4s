@@ -24,13 +24,13 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     // Given
     when(listenableFuture.get()).thenReturn(mock[Session])
     when(listenableFuture.isDone).thenReturn(true)
-    when(cluster.connectAsync("Keyspace")).thenReturn(listenableFuture)
+    when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    Await.result(ConnectedRepository(() => cluster, "Keyspace").session.get, 1 seconds)
+    Await.result(ConnectedRepository(() => cluster, "Keyspace").session.connectAsync, 1 seconds)
 
     // Then
-    verify(cluster).connectAsync("Keyspace")
+    verify(cluster).connectAsync()
   }
 
   "ConnectedRepository" should "close repository session" in {
@@ -86,7 +86,7 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
 
     when(listenableFuture.get()).thenReturn(session)
     when(listenableFuture.isDone).thenReturn(true)
-    when(cluster.connectAsync("Keyspace")).thenReturn(listenableFuture)
+    when(cluster.connectAsync()).thenReturn(listenableFuture)
     when(session.getCluster).thenReturn(cluster)
     when(cluster.getConfiguration).thenReturn(configuration)
     when(configuration.getProtocolOptions).thenReturn(protocolOptions)

@@ -19,6 +19,8 @@ lazy val `cassandra-connector` = (project in file("."))
 
 fork in run := true
 
+parallelExecution in `cassandra-connector` := false
+
 resolvers ++= Seq(
   "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
   "Sonatypes" at "https://oss.sonatype.org/content/repositories/releases",

@@ -1,19 +1,22 @@
 package com.github.mideo.cassandra.connector.testing.support
 
 import java.lang.reflect.Field
+import java.util.Objects
 
 import org.apache.cassandra.service.{CassandraDaemon, EmbeddedCassandraService}
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 
-object EmbeddedCassandra {
+private[support] object SimpleEmbeddedCassandra {
 
-  def startDb = cassandraService.start()
+  def startDb = if(!isRunning) cassandraService.start()
 
-  def isRunning: Boolean = daemon.isNativeTransportRunning
+  def stopDb =  if(isRunning) daemon.stop()
 
-  def stopDb = if (daemon.isNativeTransportRunning) daemon.stop()
+  def isRunning: Boolean = Objects.nonNull(daemon) && daemon.isNativeTransportRunning
 
   def runningPort = EmbeddedCassandraServerHelper.getNativeTransportPort
+
+  def getHosts = List(EmbeddedCassandraServerHelper.getHost)
 
   private[support] val cassandraService = new EmbeddedCassandraService()
 

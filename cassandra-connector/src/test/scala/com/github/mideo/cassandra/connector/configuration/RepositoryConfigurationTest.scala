@@ -5,14 +5,14 @@ import org.apache.cassandra.db.ConsistencyLevel
 
 class RepositoryConfigurationTest extends CassandraConnectorTest {
 
-  object TestRepositoryConfiguration extends RepositoryConfiguration
+  val conf = RepositoryConfigurationFromConfigFile()
 
   it should "load cassandra settings" in {
-    TestRepositoryConfiguration.Credentials.username.get should equal("user")
-    TestRepositoryConfiguration.Credentials.password.get should equal("pass")
-    TestRepositoryConfiguration.Keyspace should equal("cassandra_connector")
-    TestRepositoryConfiguration.Port should equal(9402)
-    TestRepositoryConfiguration.ContactPoints should equal(List("localhost"))
-    TestRepositoryConfiguration._ConsistencyLevel.name() should equal(ConsistencyLevel.LOCAL_QUORUM.name())
+    conf.credentials.username.get should equal("user")
+    conf.credentials.password.get should equal("pass")
+    conf.keyspace should equal("cassandra_connector")
+    conf.port should equal(9402)
+    conf.contactPoints should equal(List("localhost"))
+    conf.consistencyLevel.name() should equal(ConsistencyLevel.LOCAL_QUORUM.name())
   }
 }

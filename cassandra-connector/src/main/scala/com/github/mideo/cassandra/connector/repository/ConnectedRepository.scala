@@ -2,35 +2,35 @@ package com.github.mideo.cassandra.connector.repository
 
 import com.datastax.driver.core.{Cluster, Session}
 import com.datastax.driver.mapping.{Mapper, MappingManager}
-import com.github.mideo.cassandra.connector.configuration.RepositoryConfiguration
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-sealed class ConnectedRepository(private val cluster: Cluster, keyspace: String) {
-  lazy val session: ConnectedSession = ConnectedSession(cluster, keyspace)
-  lazy val repositoryMapper: RepositoryMapper = RepositoryMapper(session.get)
+sealed class ConnectedRepository(private val cluster: Cluster, private val keyspace: String) {
+  lazy val session: ConnectedSession = ConnectedSession(cluster)
+  lazy val repositoryMapper: RepositoryMapper = RepositoryMapper(session, keyspace)
 }
 
 object ConnectedRepository {
-  private def defaultBuilder = () => ClusterBuilder.fromConfig(new RepositoryConfiguration()).build()
-  def apply(clusterSupplier: () => Cluster = defaultBuilder,
-            keyspace: String ): ConnectedRepository = {
+  def apply(clusterSupplier: () => Cluster = () => ClusterBuilder.fromConfig().build(), keyspace: String ): ConnectedRepository = {
     new ConnectedRepository(clusterSupplier(), keyspace)
   }
 }
 
-case class ConnectedSession(private val cluster: Cluster, private val keyspace: String) {
-  def get: Future[Session] = cluster.connectAsync(keyspace).asScala
+case class ConnectedSession(private val cluster: Cluster) {
+  def connectAsync: Future[Session] = cluster.connectAsync().asScala
 
   def close: Future[Void] = {
     cluster.closeAsync().asScala
   }
 }
 
-case class RepositoryMapper(private val session: Future[Session]) {
-  private val manager: Future[MappingManager] = session map { s => new MappingManager(s) }
+case class RepositoryMapper(private val session: ConnectedSession, private val keyspace:String) {
+  private lazy val manager: Future[MappingManager] = session.connectAsync map { s =>
+    s.executeAsync(s"USE $keyspace")
+    new MappingManager(s)
+  }
 
   def materialise[T](t: Class[T]): Future[Mapper[T]] = manager map { m => m.mapper(t) }
 }

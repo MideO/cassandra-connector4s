@@ -2,21 +2,28 @@ package com.github.mideo.cassandra.connector.configuration
 
 import com.datastax.driver.core.ConsistencyLevel
 
-sealed case class ClusterCredentials(username: Option[String], password: Option[String]) extends OptionalConfiguration(username, password)
+private[connector] case class ClusterCredentials(username: Option[String], password: Option[String]) extends OptionalConfiguration(username, password)
 
-sealed case class ClusterDC(name: Option[String]) extends OptionalConfiguration(name)
+private[connector] case class ClusterDC(name: Option[String]) extends OptionalConfiguration(name)
 
-class RepositoryConfiguration extends CassandraConfiguration {
+case class RepositoryConfiguration(credentials: ClusterCredentials,
+                                   clusterDC: ClusterDC,
+                                   keyspace: String,
+                                   consistencyLevel: ConsistencyLevel,
+                                   port: Int,
+                                   contactPoints: List[String])
 
-  lazy val Credentials = ClusterCredentials(
-    getOptional[String]("cassandra-connector.cluster.username"),
-    getOptional[String]("cassandra-connector.cluster.password"))
 
-  lazy val DC: ClusterDC = ClusterDC(getOptional[String]("cassandra-connector.cluster.dc"))
-  lazy val Keyspace: String = get[String]("cassandra-connector.cluster.keyspace")
-  lazy val _ConsistencyLevel: ConsistencyLevel = ConsistencyLevel.valueOf(get[String]("cassandra-connector.session.consistencyLevel").toUpperCase)
-  lazy val Port: Int = get[Int]("cassandra-connector.cluster.port")
-  lazy val ContactPoints: List[String] = get[String]("cassandra-connector.cluster.contactPoints").split(",").toList
+
+object RepositoryConfigurationFromConfigFile extends CassandraConfiguration {
+  def apply(): RepositoryConfiguration =
+    RepositoryConfiguration(
+      ClusterCredentials(getOptional[String]("cassandra-connector.cluster.username"), getOptional[String]("cassandra-connector.cluster.password")),
+      ClusterDC(getOptional[String]("cassandra-connector.cluster.dc")),
+      get[String]("cassandra-connector.cluster.keyspace"),
+      ConsistencyLevel.valueOf(get[String]("cassandra-connector.session.consistencyLevel").toUpperCase),
+      get[Int]("cassandra-connector.cluster.port"),
+      get[String]("cassandra-connector.cluster.contactPoints").split(",").toList)
+
 }
-
 
