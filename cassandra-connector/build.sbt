@@ -21,6 +21,8 @@ fork in run := true
 
 parallelExecution in `cassandra-connector` := false
 
+testOptions in Test += Tests.Argument("-oDF")
+
 resolvers ++= Seq(
   "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
   "Sonatypes" at "https://oss.sonatype.org/content/repositories/releases",

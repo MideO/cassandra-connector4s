@@ -6,24 +6,23 @@ private[connector] case class ClusterCredentials(username: Option[String], passw
 
 private[connector] case class ClusterDC(name: Option[String]) extends OptionalConfiguration(name)
 
-case class RepositoryConfiguration(credentials: ClusterCredentials,
-                                   clusterDC: ClusterDC,
-                                   keyspace: String,
+case class RepositoryConfiguration(keyspace: String,
                                    consistencyLevel: ConsistencyLevel,
                                    port: Int,
-                                   contactPoints: List[String])
-
+                                   contactPoints: List[String],
+                                   credentials: ClusterCredentials = ClusterCredentials(None, None),
+                                   clusterDC: ClusterDC = ClusterDC(None))
 
 
 object RepositoryConfigurationFromConfigFile extends CassandraConfiguration {
   def apply(): RepositoryConfiguration =
     RepositoryConfiguration(
-      ClusterCredentials(getOptional[String]("cassandra-connector.cluster.username"), getOptional[String]("cassandra-connector.cluster.password")),
-      ClusterDC(getOptional[String]("cassandra-connector.cluster.dc")),
       get[String]("cassandra-connector.cluster.keyspace"),
       ConsistencyLevel.valueOf(get[String]("cassandra-connector.session.consistencyLevel").toUpperCase),
       get[Int]("cassandra-connector.cluster.port"),
-      get[String]("cassandra-connector.cluster.contactPoints").split(",").toList)
+      get[String]("cassandra-connector.cluster.contactPoints").split(",").toList,
+      ClusterCredentials(getOptional[String]("cassandra-connector.cluster.username"), getOptional[String]("cassandra-connector.cluster.password")),
+      ClusterDC(getOptional[String]("cassandra-connector.cluster.dc")))
 
 }
 
