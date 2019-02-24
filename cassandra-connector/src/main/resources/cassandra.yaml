@@ -36,7 +36,7 @@ storage_port: 0
 ssl_storage_port: 7011
 listen_address: 127.0.0.1
 start_native_transport: true
-native_transport_port: 0
+native_transport_port: 9042
 start_rpc: true
 rpc_address: localhost
 rpc_port: 0

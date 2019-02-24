@@ -13,6 +13,6 @@ class RepositoryConfigurationTest extends CassandraConnectorTest {
     TestRepositoryConfiguration.Keyspace should equal("cassandra_connector")
     TestRepositoryConfiguration.Port should equal(9402)
     TestRepositoryConfiguration.ContactPoints should equal(List("localhost"))
-    TestRepositoryConfiguration.Consistency.name() should equal(ConsistencyLevel.LOCAL_QUORUM.name())
+    TestRepositoryConfiguration._ConsistencyLevel.name() should equal(ConsistencyLevel.LOCAL_QUORUM.name())
   }
 }

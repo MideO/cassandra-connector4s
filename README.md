@@ -1,5 +1,5 @@
-# cassandra-connector
-
+# cassandra-connector - wip
+[![Build Status](https://travis-ci.org/MideO/cassandra-connector4s.svg?branch=master)](https://travis-ci.org/MideO/cassandra-connector4s)
 Cassandra DB bundle to enable 
 
 * Connection to cassandra

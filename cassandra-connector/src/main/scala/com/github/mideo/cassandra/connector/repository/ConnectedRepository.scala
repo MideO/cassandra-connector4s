@@ -2,19 +2,21 @@ package com.github.mideo.cassandra.connector.repository
 
 import com.datastax.driver.core.{Cluster, Session}
 import com.datastax.driver.mapping.{Mapper, MappingManager}
+import com.github.mideo.cassandra.connector.configuration.RepositoryConfiguration
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-sealed class ConnectedRepository(private val cluster: Cluster,
-                                 keyspace: String = ClusterBuilder.Keyspace) {
+sealed class ConnectedRepository(private val cluster: Cluster, keyspace: String) {
   lazy val session: ConnectedSession = ConnectedSession(cluster, keyspace)
   lazy val repositoryMapper: RepositoryMapper = RepositoryMapper(session.get)
 }
 
 object ConnectedRepository {
-  def apply(clusterSupplier: () => Cluster = () => ClusterBuilder.fromConfig.build(), keyspace: String = ClusterBuilder.Keyspace): ConnectedRepository = {
+  private def defaultBuilder = () => ClusterBuilder.fromConfig(new RepositoryConfiguration()).build()
+  def apply(clusterSupplier: () => Cluster = defaultBuilder,
+            keyspace: String ): ConnectedRepository = {
     new ConnectedRepository(clusterSupplier(), keyspace)
   }
 }
