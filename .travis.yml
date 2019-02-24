@@ -1,0 +1,13 @@
+language: scala
+
+jdk:
+  - oraclejdk8
+
+scala:
+  - 2.12.6
+
+notifications:
+  email:
+    recipients:
+      - mide.ojikutu@gmail.com
+script: cd cassandra-connector && sbt test
