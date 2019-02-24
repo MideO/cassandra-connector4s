@@ -1,4 +1,4 @@
-package com.github.mideo.cassandra.connector.testing.support.embeddedCassandra
+package com.github.mideo.cassandra.connector.testing.support
 
 import com.github.mideo.cassandra.connector.CassandraConnectorTest
 

@@ -15,7 +15,7 @@ object EmbeddedCassandra {
 
   def runningPort = EmbeddedCassandraServerHelper.getNativeTransportPort
 
-  private[embeddedCassandra] val cassandraService = new EmbeddedCassandraService()
+  private[support] val cassandraService = new EmbeddedCassandraService()
 
   private def daemon: CassandraDaemon = {
     val field: Field = cassandraService.getClass.getDeclaredField("cassandraDaemon")
