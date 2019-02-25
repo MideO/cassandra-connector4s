@@ -27,7 +27,7 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    Await.result(ConnectedRepository(() => cluster, "Keyspace").session.connectAsync, 1 seconds)
+    Await.result(ConnectedRepository(() => cluster, "Keyspace").connectedSession.session, 1 seconds)
 
     // Then
     verify(cluster).connectAsync()
@@ -39,7 +39,7 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     when(closeFuture.isDone).thenReturn(true)
 
     // When
-    Await.result(ConnectedRepository(() => cluster, "keyspace").session.close, 1 seconds)
+    Await.result(ConnectedRepository(() => cluster, "keyspace").connectedSession.close, 1 seconds)
 
     // Then
     verify(cluster).closeAsync()
@@ -81,13 +81,16 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     val protocolOptions = mock[ProtocolOptions]
     val metaData = mock[Metadata]
     val keySpaceMetaData = mock[KeyspaceMetadata]
-
+    val resultSetFuture = mock[ResultSetFuture]
     val columnMetadata = mock[ColumnMetadata]
+
 
     when(listenableFuture.get()).thenReturn(session)
     when(listenableFuture.isDone).thenReturn(true)
     when(cluster.connectAsync()).thenReturn(listenableFuture)
     when(session.getCluster).thenReturn(cluster)
+    when(resultSetFuture.isDone).thenReturn(true)
+    when(session.executeAsync(any(classOf[String]))).thenReturn(resultSetFuture)
     when(cluster.getConfiguration).thenReturn(configuration)
     when(configuration.getProtocolOptions).thenReturn(protocolOptions)
     when(protocolOptions.getProtocolVersion).thenReturn(ProtocolVersion.NEWEST_SUPPORTED)

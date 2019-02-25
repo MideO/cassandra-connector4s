@@ -1,6 +1,6 @@
 package com.github.mideo.cassandra.connector.repository
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.Files
 
 import com.datastax.driver.core.Session
 import com.github.mideo.cassandra.connector.CassandraConnectorTest
@@ -9,35 +9,26 @@ import org.mockito.Mockito._
 import uk.sky.cqlmigrate.CqlMigrator
 
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class CqlMigrationTest extends CassandraConnectorTest {
   before {
-    Files.deleteIfExists(TempFolder)
-    Files.createDirectory(TempFolder)
+    if (!Files.exists(migrationsDirectoryLocation)) Files.createDirectory(migrationsDirectoryLocation)
   }
-  after {
-    Files.delete(TempFolder)
-  }
+
   private val session = mock[Session]
-  private val sessionFuture: Future[Session] = Future {
-    session
-  }
   private val migrator: CqlMigrator = mock[CqlMigrator]
 
+  val keyspace = "keyspace"
+
   "CQLMigrations" should "run migrations" in {
-    val keyspace = "keyspace"
-    when(session.getLoggedKeyspace).thenReturn(keyspace)
+    CqlMigration.run(session, keyspace, migrationsResourceDirectory, migrator)
 
-    CqlMigration.run(sessionFuture, migrationsResourceDirectory, migrator)
-
-    verify(migrator).migrate(session, keyspace, List(TempFolder).asJava)
+    verify(migrator).migrate(session, keyspace, List(migrationsDirectoryLocation).asJava)
   }
 
   "CQLMigrations" should "not run  migrations if path does not exist" in {
     the[CqlMigrationException] thrownBy {
-      CqlMigration.run(sessionFuture, "abc", migrator)
+      CqlMigration.run(session, keyspace, "abc", migrator)
     } should have message "Resource path `abc` does not exist"
   }
 

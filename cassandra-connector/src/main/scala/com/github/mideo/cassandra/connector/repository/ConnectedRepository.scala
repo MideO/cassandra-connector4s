@@ -8,8 +8,8 @@ import scala.concurrent.Future
 
 
 sealed class ConnectedRepository(private val cluster: Cluster, private val keyspace: String) {
-  lazy val session: ConnectedSession = ConnectedSession(cluster)
-  lazy val repositoryMapper: RepositoryMapper = RepositoryMapper(session, keyspace)
+  lazy val connectedSession: ConnectedSession = ConnectedSession(cluster)
+  lazy val repositoryMapper: RepositoryMapper = RepositoryMapper(connectedSession.session, keyspace)
 }
 
 object ConnectedRepository {
@@ -19,17 +19,19 @@ object ConnectedRepository {
 }
 
 case class ConnectedSession(private val cluster: Cluster) {
-  def connectAsync: Future[Session] = cluster.connectAsync().asScala
+  lazy val session: Future[Session] = cluster.connectAsync().asScala
 
   def close: Future[Void] = {
     cluster.closeAsync().asScala
   }
 }
 
-case class RepositoryMapper(private val session: ConnectedSession, private val keyspace:String) {
-  private lazy val manager: Future[MappingManager] = session.connectAsync map { s =>
+case class RepositoryMapper(private val session: Future[Session], private val keyspace:String) {
+  private lazy val manager: Future[MappingManager] = session flatMap  { s =>
     s.executeAsync(s"USE $keyspace")
-    new MappingManager(s)
+      .asScala map {
+      _ => new MappingManager(s)
+    }
   }
 
   def materialise[T](t: Class[T]): Future[Mapper[T]] = manager map { m => m.mapper(t) }

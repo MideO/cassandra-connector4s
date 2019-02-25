@@ -8,8 +8,6 @@ import com.datastax.driver.core.Session
 import uk.sky.cqlmigrate.{CassandraLockConfig, CqlMigrator, CqlMigratorFactory}
 
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object CqlMigration {
 
@@ -25,13 +23,14 @@ object CqlMigration {
     CqlMigratorFactory.create(LockConfig)
   }
 
-  def run(futureSession: Future[Session], resourcePath: String, migrator: CqlMigrator = cqlMigrator): Unit = {
+  def run(session: Session, keyspace:String, resourcePath: String, migrator: CqlMigrator = cqlMigrator): Unit = {
     val url = this.getClass.getClassLoader.getResource(resourcePath)
     if (Objects.isNull(url)) throw CqlMigrationException(s"Resource path `$resourcePath` does not exist")
 
     val paths: Path = Paths.get(url.toURI)
-    futureSession map (session => {
-      migrator.migrate(session, session.getLoggedKeyspace, List(paths).asJava)
-    })
+    session.execute("CREATE KEYSPACE IF NOT EXISTS cqlmigrate WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 };")
+    session.execute("CREATE TABLE IF NOT EXISTS cqlmigrate.locks (name text PRIMARY KEY, client text);")
+    migrator.migrate(session, keyspace, List(paths).asJava)
+
   }
 }
