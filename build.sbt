@@ -1,8 +1,8 @@
-name := "cassandra-connector"
+name := "cassandra-connector4s"
 
 organization := "com.github.mideo"
 
-lazy val `cassandra-connector` = (project in file("."))
+lazy val `cassandra-connector4s` = (project in file("."))
   .settings(
     scalacOptions := Seq(
       "-unchecked",
@@ -19,7 +19,7 @@ lazy val `cassandra-connector` = (project in file("."))
 
 fork in run := true
 
-parallelExecution in `cassandra-connector` := false
+parallelExecution in `cassandra-connector4s` := false
 
 testOptions in Test += Tests.Argument("-oDF")
 
