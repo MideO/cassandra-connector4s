@@ -13,14 +13,12 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object ConnectedInMemoryRepository {
+
   def connect(keyspace: String, migrationsResourceDirectory: String = "migrations"): ConnectedRepository = {
     EmbeddedCassandra.startDb
     val connectedRepository: ConnectedRepository = ConnectedRepository(clusterSupplier(keyspace), keyspace)
-
     val session = Await.result(connectedRepository.connectedSession.session, Duration.Inf)
-
     CqlMigration.run(session, keyspace, migrationsResourceDirectory)
-
     connectedRepository
   }
 

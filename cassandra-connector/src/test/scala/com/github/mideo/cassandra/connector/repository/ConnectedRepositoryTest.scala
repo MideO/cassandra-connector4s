@@ -1,11 +1,8 @@
 package com.github.mideo.cassandra.connector.repository
 
-import java.util.UUID
-
 import com.datastax.driver.core._
 import com.datastax.driver.mapping.Mapper
-import com.datastax.driver.mapping.annotations.{Column, PartitionKey, Table}
-import com.github.mideo.cassandra.connector.CassandraConnectorTest
+import com.github.mideo.cassandra.connector.{CassandraConnectorTest, TestAddress, TestUser}
 import com.google.common.util.concurrent.ListenableFuture
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
@@ -19,6 +16,13 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
   val listenableFuture: ListenableFuture[Session] = mock[ListenableFuture[Session]]
   val closeFuture: CloseFuture = mock[CloseFuture]
 
+  val session: Session = mock[Session]
+  val configuration: Configuration = mock[Configuration]
+  val protocolOptions: ProtocolOptions = mock[ProtocolOptions]
+  val metaData: Metadata = mock[Metadata]
+  val keySpaceMetaData: KeyspaceMetadata = mock[KeyspaceMetadata]
+  val resultSetFuture: ResultSetFuture = mock[ResultSetFuture]
+  val columnMetadata: ColumnMetadata = mock[ColumnMetadata]
 
   "ConnectedRepository" should "provide repository session" in {
     // Given
@@ -27,7 +31,7 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    Await.result(ConnectedRepository(() => cluster, "Keyspace").connectedSession.session, 1 seconds)
+    Await.result(ConnectedRepository(() => cluster, "cassandra_connector").connectedSession.session, 1 seconds)
 
     // Then
     verify(cluster).connectAsync()
@@ -39,7 +43,7 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     when(closeFuture.isDone).thenReturn(true)
 
     // When
-    Await.result(ConnectedRepository(() => cluster, "keyspace").connectedSession.close, 1 seconds)
+    Await.result(ConnectedRepository(() => cluster, "cassandra_connector").connectedSession.close, 1 seconds)
 
     // Then
     verify(cluster).closeAsync()
@@ -51,15 +55,11 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     val tableMetaData = mock[TableMetadata]
     setUpMapperMocks(tableMetaData)
 
-    @Table(keyspace = "Keyspace", name = "table")
-    case class User(@PartitionKey @Column(name = "user_id") userId: UUID, @Column(name = "name") name: String)
-
-    @Table(keyspace = "Keyspace", name = "table")
-    case class Address(@PartitionKey @Column(name = "address_id") addressId: UUID, @Column(name = "name") name: String)
 
     // When
-    val manager = ConnectedRepository(() => cluster, "Keyspace").repositoryMapper
-    val userMapper: Mapper[User] = Await.result(manager.materialise(classOf[User]), 1 second)
+    when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
+    val manager = ConnectedRepository(() => cluster, "cassandra_connector").repositoryMapper
+    val userMapper: Mapper[TestUser] = Await.result(manager.materialise(classOf[TestUser]), 1 second)
 
     // Then
     userMapper should not be null
@@ -67,7 +67,8 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
 
 
     //When
-    val addressMapper: Mapper[Address] = Await.result(manager.materialise(classOf[Address]), 1 second)
+    when(keySpaceMetaData.getTable("address")).thenReturn(tableMetaData)
+    val addressMapper: Mapper[TestAddress] = Await.result(manager.materialise(classOf[TestAddress]), 1 second)
 
 
     // Then
@@ -75,14 +76,9 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
   }
 
 
+
   private def setUpMapperMocks(tableMetaData: TableMetadata): Unit = {
-    val session = mock[Session]
-    val configuration = mock[Configuration]
-    val protocolOptions = mock[ProtocolOptions]
-    val metaData = mock[Metadata]
-    val keySpaceMetaData = mock[KeyspaceMetadata]
-    val resultSetFuture = mock[ResultSetFuture]
-    val columnMetadata = mock[ColumnMetadata]
+
 
 
     when(listenableFuture.get()).thenReturn(session)
@@ -95,8 +91,8 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     when(configuration.getProtocolOptions).thenReturn(protocolOptions)
     when(protocolOptions.getProtocolVersion).thenReturn(ProtocolVersion.NEWEST_SUPPORTED)
     when(cluster.getMetadata).thenReturn(metaData)
-    when(metaData.getKeyspace("Keyspace")).thenReturn(keySpaceMetaData)
-    when(keySpaceMetaData.getTable("table")).thenReturn(tableMetaData)
+    when(metaData.getKeyspace("cassandra_connector")).thenReturn(keySpaceMetaData)
+    when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
     when(tableMetaData.getColumn(any())).thenReturn(columnMetadata)
 
   }
