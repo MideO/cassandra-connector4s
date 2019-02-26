@@ -31,7 +31,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
   val connectedRepository: ConnectedRepository = ConnectedInMemoryRepository.connect("cassandra_connector", migrationsResourceDirectory)
 
-  it should "start EmbeddedDb" in {
+  "ConnectedInMemoryRepository" should "start EmbeddedDb" in {
 
     ConnectedInMemoryRepository.EmbeddedCassandra.isRunning should be(true)
     ConnectedInMemoryRepository.EmbeddedCassandra.runningPort should not equal null
@@ -39,7 +39,7 @@ class IntegrationTests extends CassandraConnectorTest {
   }
 
 
-  it should "run migrations " in {
+  "ConnectedInMemoryRepository" should "run migrations " in {
     val result: ResultSet = Await.result(connectedRepository.connectedSession.session map {
       s => {
         s.execute("USE cqlmigrate;")
@@ -51,7 +51,7 @@ class IntegrationTests extends CassandraConnectorTest {
   }
 
 
-  it should "materialise repository should get data from repository" in {
+  "materialise repository " should " get data from repository" in {
     val userMapper: Mapper[TestUser] = Await.result(connectedRepository.repositoryMapper.materialise(classOf[TestUser]), 5 seconds)
 
     val pk = UUID.randomUUID
@@ -66,7 +66,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
   }
 
-  it should "materialise repository should delete data from repository" in {
+  "materialise repository " should "delete data from repository" in {
     val userMapper: Mapper[TestUser] = Await.result(connectedRepository.repositoryMapper.materialise(classOf[TestUser]), 5 seconds)
 
     val pk = UUID.randomUUID
@@ -80,7 +80,7 @@ class IntegrationTests extends CassandraConnectorTest {
     actual should be (null)
   }
 
-  it should "materialise repository should update data from repository" in {
+  "materialise repository " should "update data from repository" in {
     val userMapper: Mapper[TestUser] = Await.result(connectedRepository.repositoryMapper.materialise(classOf[TestUser]), 5 seconds)
 
     val pk = UUID.randomUUID
