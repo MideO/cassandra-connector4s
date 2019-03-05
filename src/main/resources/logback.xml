@@ -11,7 +11,7 @@
         <appender-ref ref="STDOUT"/>
     </appender>
 
-  <logger name="com.github.mideo" level="debug">
+  <logger name="com.github.mideo" level="WARN">
     <appender-ref ref="ASYNC_STDOUT" />
   </logger>
 </configuration>

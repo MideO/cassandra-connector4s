@@ -7,7 +7,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 
@@ -35,6 +35,20 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
 
     // Then
     verify(cluster).connectAsync()
+  }
+
+  "ConnectedRepository" should "run migrations" in {
+    // Given
+    when(listenableFuture.get()).thenReturn(mock[Session])
+    when(listenableFuture.isDone).thenReturn(true)
+    when(cluster.connectAsync()).thenReturn(listenableFuture)
+
+    // When
+    val connectedRepository = ConnectedRepository(() => cluster, "cassandra_connector")
+    val migrate: Future[Unit] = connectedRepository.runMigrations("aGivenDirectoryWithDotCqlFiles")
+
+    // Then
+    migrate.isInstanceOf[Future[Unit]] should be(true)
   }
 
   "ConnectedRepository" should "close repository session" in {

@@ -5,34 +5,40 @@ import java.util.UUID
 
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.mapping.Mapper
-import com.github.mideo.cassandra.connector.{CassandraConnectorTest, TestUser}
 import com.github.mideo.cassandra.connector.repository.ConnectedRepository
+import com.github.mideo.cassandra.connector.{CassandraConnectorTest, TestUser}
 
-import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 class IntegrationTests extends CassandraConnectorTest {
 
   behavior of "IntegrationTests"
 
+  private var connectedRepository: ConnectedRepository = _
 
-  val bootstrap: Path = Paths.get(migrationsDirectoryLocation + "/bootstrap.cql")
-  val users_table: Path = Paths.get(migrationsDirectoryLocation + "/create_user_table.cql")
+  override def beforeAll(): Unit = {
+    val bootstrap: Path = Paths.get(migrationsDirectoryLocation + "/bootstrap.cql")
+    val users_table: Path = Paths.get(migrationsDirectoryLocation + "/create_user_table.cql")
 
-  if (!Files.exists(migrationsDirectoryLocation)) Files.createDirectory(migrationsDirectoryLocation)
-  if (!Files.exists(bootstrap)) Files.createFile(bootstrap)
-  if (!Files.exists(users_table)) Files.createFile(users_table)
+    if (!Files.exists(migrationsDirectoryLocation)) Files.createDirectory(migrationsDirectoryLocation)
+    if (!Files.exists(bootstrap)) Files.createFile(bootstrap)
+    if (!Files.exists(users_table)) Files.createFile(users_table)
 
+    Files.write(bootstrap, "CREATE KEYSPACE cassandra_connector WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 };".getBytes)
+    Files.write(users_table, "CREATE TABLE cassandra_connector.users (user_id UUID , name text, PRIMARY KEY(user_id));".getBytes)
 
-  Files.write(bootstrap, "CREATE KEYSPACE cassandra_connector WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 };".getBytes)
-  Files.write(users_table, "CREATE TABLE cassandra_connector.users (user_id UUID , name text, PRIMARY KEY(user_id));".getBytes)
+    connectedRepository = ConnectedInMemoryRepository.connect("cassandra_connector")
+    Await.result(connectedRepository.runMigrations(migrationsResourceDirectory), 2 minutes)
+  }
 
+  override def afterAll(): Unit = {
+    connectedRepository.connectedSession.close
+  }
 
-  val connectedRepository: ConnectedRepository = ConnectedInMemoryRepository.connect("cassandra_connector", migrationsResourceDirectory)
 
   "ConnectedInMemoryRepository" should "start EmbeddedDb" in {
-
     ConnectedInMemoryRepository.EmbeddedCassandra.isRunning should be(true)
     ConnectedInMemoryRepository.EmbeddedCassandra.runningPort should not equal null
     ConnectedInMemoryRepository.EmbeddedCassandra.getHosts should equal(List("localhost"))
@@ -52,14 +58,17 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   "materialise repository " should " get data from repository" in {
-    val userMapper: Mapper[TestUser] = Await.result(connectedRepository.repositoryMapper.materialise(classOf[TestUser]), 5 seconds)
+    val userMapper: Future[Mapper[TestUser]] = connectedRepository.repositoryMapper.materialise(classOf[TestUser])
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
 
-    userMapper.save(mideo)
+    userMapper.map {
+      _.save(mideo)
+    }
 
-    val actual = userMapper.get(pk)
+
+    val actual = Await.result(userMapper.map{ _.get(pk)}, 5 seconds)
 
     actual.userId should equal(mideo.userId)
     actual.name should equal(mideo.name)
@@ -77,8 +86,9 @@ class IntegrationTests extends CassandraConnectorTest {
     userMapper.delete(pk)
 
     val actual = userMapper.get(pk)
-    actual should be (null)
+    actual should be(null)
   }
+
 
   "materialise repository " should "update data from repository" in {
     val userMapper: Mapper[TestUser] = Await.result(connectedRepository.repositoryMapper.materialise(classOf[TestUser]), 5 seconds)

@@ -11,7 +11,7 @@ import uk.sky.cqlmigrate.CqlMigrator
 import scala.collection.JavaConverters._
 
 class CqlMigrationTest extends CassandraConnectorTest {
-  before {
+  override def beforeAll() {
     if (!Files.exists(migrationsDirectoryLocation)) Files.createDirectory(migrationsDirectoryLocation)
   }
 

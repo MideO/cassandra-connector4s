@@ -10,10 +10,17 @@ import scala.concurrent.Future
 sealed class ConnectedRepository(private val cluster: Cluster, private val keyspace: String) {
   lazy val connectedSession: ConnectedSession = ConnectedSession(cluster)
   lazy val repositoryMapper: RepositoryMapper = RepositoryMapper(connectedSession.session, keyspace)
+
+  def runMigrations(migrationsDirector:String): Future[Unit] = {
+     connectedSession.session map {
+      session => CqlMigration.run(session, keyspace, migrationsDirector)
+    }
+  }
 }
 
 object ConnectedRepository {
-  def apply(clusterSupplier: () => Cluster = () => ClusterBuilder.fromConfig().build(), keyspace: String ): ConnectedRepository = {
+  private def defaultClusterSupplier: () => Cluster = () => ClusterBuilder.fromConfig().build()
+  def apply(clusterSupplier: () => Cluster = defaultClusterSupplier, keyspace: String): ConnectedRepository = {
     new ConnectedRepository(clusterSupplier(), keyspace)
   }
 }

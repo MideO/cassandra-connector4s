@@ -9,7 +9,7 @@ import uk.sky.cqlmigrate.{CassandraLockConfig, CqlMigrator, CqlMigratorFactory}
 
 import scala.collection.JavaConverters._
 
-object CqlMigration {
+private [cassandra] object CqlMigration {
 
   case class CqlMigrationException(private val message: String = "",
                                    private val cause: Throwable = None.orNull) extends RuntimeException(message, cause)

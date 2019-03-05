@@ -12,7 +12,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 package object repository {
+
   private[cassandra] object ClusterBuilder {
+
     private var _builder: Cluster.Builder = Cluster.builder
     private final val socketOptions: SocketOptions = new SocketOptions()
     socketOptions.setConnectTimeoutMillis(1000)

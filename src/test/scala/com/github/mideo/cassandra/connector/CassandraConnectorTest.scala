@@ -5,13 +5,13 @@ import java.util.UUID
 
 import com.datastax.driver.mapping.annotations.{Column, PartitionKey, Table}
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.beans.BeanProperty
 
 trait CassandraConnectorTest
   extends FlatSpec
-    with BeforeAndAfter
+    with BeforeAndAfterAll
     with MockitoSugar
     with Matchers {
   val migrationsResourceDirectory = "migrations"
@@ -25,7 +25,7 @@ class TestUser() {
   @BeanProperty var userId: UUID = _
   @BeanProperty var name: String = _
 
-  def this(userId:UUID, name:String) = {
+  def this(userId: UUID, name: String) = {
     this()
     this.userId = userId
     this.name = name
@@ -40,7 +40,7 @@ class TestAddress() {
   @BeanProperty var addressId: UUID = _
   @BeanProperty var name: String = _
 
-  def this(addressId:UUID, name:String) = {
+  def this(addressId: UUID, name: String) = {
     this()
     this.addressId = addressId
     this.name = name
