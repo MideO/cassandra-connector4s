@@ -6,7 +6,7 @@
 * Connection to cassandra
 * Connection to cassandra embedded cassadra for testing
 * Generic materialised repository 
-* Managing migrations (with [Cqlmigrate](https://github.com/sky-uk/cqlmigrate#what-it-does) and [CqlMigration.scala](src/main/scala/com/github/mideo/cassandra/connector/repository/CqlMigration.scalaCqlMigration.scala))
+* Managing migrations with [Cqlmigrate](https://github.com/sky-uk/cqlmigrate#what-it-does)
 
 ##### Docs?
   See Functional tests: [IntegrationTests.scala](src/test/scala/com/github/mideo/cassandra/testing/support/IntegrationTests.scala)
