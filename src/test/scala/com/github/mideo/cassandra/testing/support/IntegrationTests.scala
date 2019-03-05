@@ -18,20 +18,20 @@ class IntegrationTests extends CassandraConnectorTest {
 
   private var connectedRepository: ConnectedRepository = _
 
-  override def beforeAll(): Unit = {
-    val bootstrap: Path = Paths.get(migrationsDirectoryLocation + "/bootstrap.cql")
-    val users_table: Path = Paths.get(migrationsDirectoryLocation + "/create_user_table.cql")
 
-    if (!Files.exists(migrationsDirectoryLocation)) Files.createDirectory(migrationsDirectoryLocation)
-    if (!Files.exists(bootstrap)) Files.createFile(bootstrap)
-    if (!Files.exists(users_table)) Files.createFile(users_table)
+  val bootstrap: Path = Paths.get(migrationsDirectoryLocation + "/bootstrap.cql")
+  val users_table: Path = Paths.get(migrationsDirectoryLocation + "/create_user_table.cql")
 
-    Files.write(bootstrap, "CREATE KEYSPACE cassandra_connector WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 };".getBytes)
-    Files.write(users_table, "CREATE TABLE cassandra_connector.users (user_id UUID , name text, PRIMARY KEY(user_id));".getBytes)
+  if (!Files.exists(migrationsDirectoryLocation)) Files.createDirectory(migrationsDirectoryLocation)
+  if (!Files.exists(bootstrap)) Files.createFile(bootstrap)
+  if (!Files.exists(users_table)) Files.createFile(users_table)
 
-    connectedRepository = ConnectedInMemoryRepository.connect("cassandra_connector")
-    Await.result(connectedRepository.runMigrations(migrationsResourceDirectory), 2 minutes)
-  }
+  Files.write(bootstrap, "CREATE KEYSPACE cassandra_connector WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 };".getBytes)
+  Files.write(users_table, "CREATE TABLE cassandra_connector.users (user_id UUID , name text, PRIMARY KEY(user_id));".getBytes)
+
+  connectedRepository = ConnectedInMemoryRepository.connect("cassandra_connector")
+  Await.result(connectedRepository.runMigrations(migrationsResourceDirectory), 2 minutes)
+
 
   override def afterAll(): Unit = {
     connectedRepository.connectedSession.close
@@ -68,7 +68,9 @@ class IntegrationTests extends CassandraConnectorTest {
     }
 
 
-    val actual = Await.result(userMapper.map{ _.get(pk)}, 5 seconds)
+    val actual = Await.result(userMapper.map {
+      _.get(pk)
+    }, 5 seconds)
 
     actual.userId should equal(mideo.userId)
     actual.name should equal(mideo.name)
