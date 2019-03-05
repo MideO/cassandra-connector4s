@@ -1,7 +1,7 @@
 ## cassandra-connector
 [![Build Status](https://travis-ci.org/MideO/cassandra-connector4s.svg?branch=master)](https://travis-ci.org/MideO/cassandra-connector4s)
 
-
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mideo/cassandra-connector4s_2.12/badge.svg)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.mideo%22%20a%3A%22cassandra-connector4s_2.12%22)
 ## Cassandra DB bundle to enable 
 * Connection to cassandra
 * Connection to cassandra embedded cassadra for testing
