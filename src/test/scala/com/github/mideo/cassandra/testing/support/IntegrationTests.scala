@@ -4,9 +4,9 @@ import java.nio.file.{Files, Path, Paths}
 import java.util.UUID
 
 import com.datastax.driver.core.ResultSet
-import com.datastax.driver.mapping.Mapper
+import com.datastax.driver.mapping.{Mapper, Result}
 import com.github.mideo.cassandra.connector.repository.ConnectedRepository
-import com.github.mideo.cassandra.connector.{CassandraConnectorTest, TestUser}
+import com.github.mideo.cassandra.connector.{CassandraConnectorTest, TestUser, TestUserAccessor}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -76,6 +76,58 @@ class IntegrationTests extends CassandraConnectorTest {
     actual.name should equal(mideo.name)
 
   }
+
+
+  it should " create accessor (getAll)" in {
+    val userMapper: Future[Mapper[TestUser]] = connectedRepository.repositoryMapper.materialise(classOf[TestUser])
+    val userAccesssor: Future[TestUserAccessor] = connectedRepository.repositoryMapper.materialiseAccessor(classOf[TestUserAccessor])
+
+    val pk = UUID.randomUUID
+    val mideo = new TestUser(pk, "mideo")
+
+
+
+    userMapper.map {
+      _.save(mideo)
+    }
+
+
+    val result: Result[TestUser] = Await.result(userAccesssor.map {
+      _.getAll
+    }, 5 seconds)
+
+
+    (result.all().size()> 1) should equal(true)
+
+
+  }
+  it should " create accessor (truncate)" in {
+    val userMapper: Future[Mapper[TestUser]] = connectedRepository.repositoryMapper.materialise(classOf[TestUser])
+    val userAccesssor: Future[TestUserAccessor] = connectedRepository.repositoryMapper.materialiseAccessor(classOf[TestUserAccessor])
+
+    val pk = UUID.randomUUID
+    val mideo = new TestUser(pk, "mideo")
+
+
+
+    userMapper.map {
+      _.save(mideo)
+    }
+
+    Await.result(userAccesssor.map {
+      _.truncate
+    }, 5 seconds)
+
+    val result: Result[TestUser] = Await.result(userAccesssor.map {
+      _.getAll
+    }, 5 seconds)
+
+
+    result.all().size() should equal(0)
+
+
+  }
+
 
   "materialise repository " should "delete data from repository" in {
     val userMapper: Mapper[TestUser] = Await.result(connectedRepository.repositoryMapper.materialise(classOf[TestUser]), 5 seconds)

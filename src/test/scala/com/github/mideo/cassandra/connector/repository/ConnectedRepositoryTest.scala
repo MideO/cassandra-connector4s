@@ -90,6 +90,22 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
   }
 
 
+  "ConnectedRepository" should "get Manager" in {
+    // Given
+    val tableMetaData = mock[TableMetadata]
+    setUpMapperMocks(tableMetaData)
+
+
+    // When
+    when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
+    val manager = ConnectedRepository(() => cluster, "cassandra_connector").repositoryMapper
+    val mappingManager = Await.result(manager.getMappingManager, 1 second)
+
+    // Then
+    mappingManager.getSession should equal(session)
+  }
+
+
 
   private def setUpMapperMocks(tableMetaData: TableMetadata): Unit = {
 

@@ -42,4 +42,9 @@ case class RepositoryMapper(private val session: Future[Session], private val ke
   }
 
   def materialise[T](t: Class[T]): Future[Mapper[T]] = manager map { m => m.mapper(t, keyspace) }
+
+  def materialiseAccessor[T](t: Class[T]) = manager map { m => m.createAccessor(t) }
+
+  def getMappingManager: Future[MappingManager] = manager
+
 }

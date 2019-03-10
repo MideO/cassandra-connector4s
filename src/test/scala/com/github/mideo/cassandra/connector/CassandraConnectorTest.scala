@@ -3,7 +3,8 @@ package com.github.mideo.cassandra.connector
 import java.nio.file.{Path, Paths}
 import java.util.UUID
 
-import com.datastax.driver.mapping.annotations.{Column, PartitionKey, Table}
+import com.datastax.driver.mapping.Result
+import com.datastax.driver.mapping.annotations._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
@@ -30,6 +31,12 @@ class TestUser() {
     this.userId = userId
     this.name = name
   }
+}
+
+
+@Accessor trait TestUserAccessor {
+  @Query("SELECT * FROM users") def getAll: Result[TestUser]
+  @Query("TRUNCATE users") def truncate: Result[TestUser]
 }
 
 
