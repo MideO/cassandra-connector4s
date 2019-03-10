@@ -47,6 +47,15 @@ class User() {
 }
 ```
 
+##### Define a customer Repository Accessor
+```scala
+@Accessor trait TestUserAccessor {
+  @Query("SELECT * FROM users") def getAll: Result[TestUser]
+  @Query("TRUNCATE users") def truncate: Result[TestUser]
+}
+
+```
+
 ##### Perform CRUD Ops
 ```scala
 // Create a connected repository
@@ -70,6 +79,15 @@ userMapper.map { _.get(mideo.userId) }
 
 // Delete user
 userMapper.map { _.delete(mideo.userId) }
+
+
+// user custom accessor
+val accessor: Future[TestUserAccessor] = connectedRepository.repositoryMapper.materialiseAccessor(classOf[TestUserAccessor])
+
+accessor.getAll
+
+accessor.truncate
+
 ```
 
 ##### Testing with [EmbeddedCassandra](https://github.com/jsevellec/cassandra-unit)
