@@ -14,6 +14,7 @@ tmp/*
 
 # java specific
 *.class
+*.cache
 
 # python specific
 *.pyc
@@ -32,6 +33,7 @@ logs/*
 
 # sbt specific
 target/
+**/project/target
 project/boot
 lib_managed/*
 project/build/target
