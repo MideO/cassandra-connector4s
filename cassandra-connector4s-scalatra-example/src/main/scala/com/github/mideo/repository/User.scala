@@ -1,4 +1,4 @@
-package com.github.mideo.repositories
+package com.github.mideo.repository
 
 import java.util.UUID
 

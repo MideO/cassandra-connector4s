@@ -4,7 +4,7 @@ import java.util.{Comparator, UUID}
 
 import akka.actor.ActorSystem
 import com.datastax.driver.mapping.Mapper
-import com.github.mideo.repositories.{RepositoryMapper, User, UserAccessor}
+import com.github.mideo.repository.{RepositoryMapper, User, UserAccessor}
 import javax.inject.Singleton
 import org.codehaus.jackson.map.ObjectMapper
 import org.scalatra.json.JacksonJsonSupport

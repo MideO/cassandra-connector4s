@@ -7,7 +7,7 @@ import scala.concurrent.Await
 import concurrent.duration._
 
 
-package object repositories {
+package object repository {
 
   // if connecting to real database, define cassandra-connector.conf resources directory and user ConnectedSession
   // val c: ConnectedRepository = ConnectedRepository(keyspace="cassandra_connector")

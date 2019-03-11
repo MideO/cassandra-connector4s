@@ -16,9 +16,6 @@ class IntegrationTests extends CassandraConnectorTest {
 
   behavior of "IntegrationTests"
 
-  private var connectedRepository: ConnectedRepository = _
-
-
   val bootstrap: Path = Paths.get(migrationsDirectoryLocation + "/bootstrap.cql")
   val users_table: Path = Paths.get(migrationsDirectoryLocation + "/create_user_table.cql")
 
@@ -29,8 +26,8 @@ class IntegrationTests extends CassandraConnectorTest {
   Files.write(bootstrap, "CREATE KEYSPACE cassandra_connector WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 };".getBytes)
   Files.write(users_table, "CREATE TABLE cassandra_connector.users (user_id UUID , name text, PRIMARY KEY(user_id));".getBytes)
 
-  connectedRepository = ConnectedInMemoryRepository.connect("cassandra_connector")
-  Await.result(connectedRepository.runMigrations(migrationsResourceDirectory), 2 minutes)
+  private val connectedRepository: ConnectedRepository = ConnectedInMemoryRepository.connect("cassandra_connector")
+  Await.result(connectedRepository.runMigrations(migrationsResourceDirectory), 5 minutes)
 
 
   override def afterAll(): Unit = {
@@ -70,10 +67,10 @@ class IntegrationTests extends CassandraConnectorTest {
 
     val actual = Await.result(userMapper.map {
       _.get(pk)
-    }, 5 seconds)
+    }, 10 seconds)
 
-    actual.userId should equal(mideo.userId)
-    actual.name should equal(mideo.name)
+    mideo.userId should equal(actual.userId)
+    mideo.name should equal(actual.name)
 
   }
 
