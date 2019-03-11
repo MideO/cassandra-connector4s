@@ -4,7 +4,6 @@
 *.DS_Store
 *.swp
 *.out
-.idea
 
 # rails specific
 *.sqlite3
@@ -68,12 +67,3 @@ jrebel.lic
 
 # paulp script
 /.lib/
-
-logs
-target
-/.idea
-/.idea_modules
-/.classpath
-/.project
-/.settings
-/RUNNING_PID

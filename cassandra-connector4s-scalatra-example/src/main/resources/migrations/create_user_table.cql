@@ -1,0 +1,1 @@
+CREATE TABLE cassandra_connector.users (user_id UUID , name text, PRIMARY KEY(user_id));

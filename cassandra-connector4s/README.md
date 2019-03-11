@@ -9,7 +9,7 @@
 * Managing migrations with [Cqlmigrate](https://github.com/sky-uk/cqlmigrate#what-it-does)
 
 ##### Docs?
-  See Functional tests: [IntegrationTests.scala](cassandra-connector4s/src/test/scala/com/github/mideo/cassandra/testing/support/IntegrationTests.scala)
+  See Functional tests: [IntegrationTests.scala](src/test/scala/com/github/mideo/cassandra/testing/support/IntegrationTests.scala)
   
 #### Uage
 
