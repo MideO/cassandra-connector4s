@@ -10,3 +10,4 @@ notifications:
   email:
     recipients:
       - mide.ojikutu@gmail.com
+script: sbt cassandra-connector4s/test && sbt cassandra-connector4s-scalatra-example/test
