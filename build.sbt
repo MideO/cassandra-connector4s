@@ -35,17 +35,17 @@ resolvers += Classpaths.typesafeReleases
 resolvers += JCenterRepository
 
 libraryDependencies ++= Seq(
-  "com.datastax.cassandra" % "cassandra-driver-mapping" % "3.6.0",
+  "com.datastax.cassandra" % "cassandra-driver-mapping" % "3.6.0" excludeAll ExclusionRule(organization = "io.netty"),
   "ch.qos.logback" % "logback-classic" % "1.2.3" % "runtime",
-  "com.typesafe.akka" %% "akka-actor" % "2.5.17",
-  "net.databinder.dispatch" %% "dispatch-core" % "0.13.2",
-  "com.typesafe" % "config" % "1.3.3",
-  "org.apache.cassandra" % "cassandra-all" % "3.11.3" exclude("ch.qos.logback", "logback-classic") exclude("org.slf4j", "slf4j-log4j12"),
-  "org.cassandraunit" % "cassandra-unit" % "3.5.0.1",
-  "uk.sky" % "cqlmigrate" % "0.9.8" exclude("org.slf4j", "slf4j-api"),
+  "com.typesafe.akka" %% "akka-actor" % "2.5.17" excludeAll ExclusionRule(organization = "io.netty"),
+  "net.databinder.dispatch" %% "dispatch-core" % "0.13.2" excludeAll ExclusionRule(organization = "io.netty"),
+  "com.typesafe" % "config" % "1.3.3" excludeAll ExclusionRule(organization = "io.netty"),
+  "org.apache.cassandra" % "cassandra-all" % "3.11.4" exclude("ch.qos.logback", "logback-classic") exclude("org.slf4j", "slf4j-log4j12") excludeAll ExclusionRule(organization = "io.netty"),
+  "org.cassandraunit" % "cassandra-unit" % "3.5.0.1" excludeAll ExclusionRule(organization = "io.netty"),
+  "uk.sky" % "cqlmigrate" % "0.9.8" exclude("org.slf4j", "slf4j-api") excludeAll ExclusionRule(organization = "io.netty"),
   "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-  "org.mockito" % "mockito-all" % "1.10.19" % Test
-
+  "org.mockito" % "mockito-all" % "1.10.19" % Test,
+  "io.netty" % "netty-all" % "4.0.56.Final"
 
 )
 
