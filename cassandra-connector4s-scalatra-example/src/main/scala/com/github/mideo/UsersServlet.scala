@@ -45,13 +45,8 @@ class UsersServlet
   get("/users") {
     futureMapper map  {
       mapper =>
-        val uid = UUID.randomUUID()
-        val user = new User(uid, "scalatraUser")
-
         mapper.save(new User(UUID.randomUUID(), "scalatraUser1"))
         mapper.save(new User(UUID.randomUUID(), "scalatraUser2"))
-
-        objectMapper.writeValueAsString(mapper.get(uid))
     } flatMap (
       _ => futureAccessor map { accessor => objectMapper
         .writeValueAsString({
