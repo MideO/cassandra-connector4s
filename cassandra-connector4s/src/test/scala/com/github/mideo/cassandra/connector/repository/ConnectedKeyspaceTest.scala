@@ -11,7 +11,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 
-class ConnectedRepositoryTest extends CassandraConnectorTest {
+class ConnectedKeyspaceTest extends CassandraConnectorTest {
   val cluster: Cluster = mock[Cluster]
   val listenableFuture: ListenableFuture[Session] = mock[ListenableFuture[Session]]
   val closeFuture: CloseFuture = mock[CloseFuture]
@@ -31,7 +31,7 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    Await.result(ConnectedRepository(() => cluster, "cassandra_connector").connectedSession.session, 1 seconds)
+    Await.result(ConnectedKeyspace(() => cluster, "cassandra_connector").session, 1 seconds)
 
     // Then
     verify(cluster).connectAsync()
@@ -44,7 +44,7 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    val connectedRepository = ConnectedRepository(() => cluster, "cassandra_connector")
+    val connectedRepository = ConnectedKeyspace(() => cluster, "cassandra_connector")
     val migrate: Future[Unit] = connectedRepository.runMigrations("aGivenDirectoryWithDotCqlFiles")
 
     // Then
@@ -57,7 +57,7 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
     when(closeFuture.isDone).thenReturn(true)
 
     // When
-    Await.result(ConnectedRepository(() => cluster, "cassandra_connector").connectedSession.close, 1 seconds)
+    Await.result(ConnectedKeyspace(() => cluster, "cassandra_connector").close, 1 seconds)
 
     // Then
     verify(cluster).closeAsync()
@@ -72,8 +72,8 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
 
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
-    val manager = ConnectedRepository(() => cluster, "cassandra_connector").repositoryMapper
-    val userMapper: Mapper[TestUser] = Await.result(manager.materialise(classOf[TestUser]), 1 second)
+    val keyspace = ConnectedKeyspace(() => cluster, "cassandra_connector")
+    val userMapper: Mapper[TestUser] = Await.result(keyspace.materialise(classOf[TestUser]), 1 second)
 
     // Then
     userMapper should not be null
@@ -82,7 +82,7 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
 
     //When
     when(keySpaceMetaData.getTable("address")).thenReturn(tableMetaData)
-    val addressMapper: Mapper[TestAddress] = Await.result(manager.materialise(classOf[TestAddress]), 1 second)
+    val addressMapper: Mapper[TestAddress] = Await.result(keyspace.materialise(classOf[TestAddress]), 1 second)
 
 
     // Then
@@ -98,8 +98,8 @@ class ConnectedRepositoryTest extends CassandraConnectorTest {
 
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
-    val manager = ConnectedRepository(() => cluster, "cassandra_connector").repositoryMapper
-    val mappingManager = Await.result(manager.getMappingManager, 1 second)
+    val keyspace = ConnectedKeyspace(() => cluster, "cassandra_connector")
+    val mappingManager = Await.result(keyspace.getMappingManager, 1 second)
 
     // Then
     mappingManager.getSession should equal(session)

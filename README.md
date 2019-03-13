@@ -9,7 +9,7 @@
 * Managing migrations with [Cqlmigrate](https://github.com/sky-uk/cqlmigrate#what-it-does)
 
 ##### Docs?
-  See Functional tests: [IntegrationTests.scala](cassandra-connector4s/src/test/scala/com/github/mideo/cassandra/testing/support/IntegrationTests.scala)
+  See Functional tests: [IntegrationTests.scala](src/test/scala/com/github/mideo/cassandra/testing/support/IntegrationTests.scala)
   
 #### Uage
 
@@ -59,13 +59,13 @@ class User() {
 ##### Perform CRUD Ops
 ```scala
 // Create a connected repository
-val connectedRepository = ConnectedRepository.connect("cassandra_connector")
+val connectedKeyspace = ConnectedKeyspace.connect("cassandra_connector")
 
 // Run migrations if required
-connectedRepository.runMigrations("aGivenDirectoryWithDotCqlFiles")
+connectedKeyspace.runMigrations("aGivenDirectoryWithDotCqlFiles")
 
 // Materialise a repository
-val userMapper: Future[Mapper[TestUser]] = connectedRepository.repositoryMapper.materialise(classOf[TestUser])
+val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise(classOf[TestUser])
 
 // Create an instance of repository entity
 val mideo = new User(UUID.randomUUID, "mideo")
@@ -82,7 +82,7 @@ userMapper.map { _.delete(mideo.userId) }
 
 
 // user custom accessor
-val accessor: Future[TestUserAccessor] = connectedRepository.repositoryMapper.materialiseAccessor(classOf[TestUserAccessor])
+val accessor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor(classOf[TestUserAccessor])
 
 accessor.getAll
 
@@ -94,7 +94,7 @@ accessor.truncate
 
 ```scala
 // Connect with the ConnectedInMemoryRepository object
-val connectedRepository: ConnectedRepository = ConnectedInMemoryRepository.connect("cassandra_connector")
+val connectedKeyspace: ConnectedKeyspace = ConnectedInMemoryKeyspace.connect("cassandra_connector")
 
 // embedded cassandra is started and off you go!
 

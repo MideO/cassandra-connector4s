@@ -5,15 +5,15 @@ import java.util.Objects
 
 import com.datastax.driver.core.{Cluster, ConsistencyLevel}
 import com.github.mideo.cassandra.connector.configuration.RepositoryConfiguration
-import com.github.mideo.cassandra.connector.repository.{ClusterBuilder, ConnectedRepository}
+import com.github.mideo.cassandra.connector.repository.{ClusterBuilder, ConnectedKeyspace}
 import org.apache.cassandra.service.{CassandraDaemon, EmbeddedCassandraService}
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 
-object ConnectedInMemoryRepository {
+object ConnectedInMemoryKeyspace {
 
-  def connect(keyspace: String): ConnectedRepository = {
+  def connect(keyspace: String): ConnectedKeyspace = {
     EmbeddedCassandra.startDb
-    ConnectedRepository(clusterSupplier(keyspace), keyspace)
+    ConnectedKeyspace(clusterSupplier(keyspace), keyspace)
   }
 
   def clusterSupplier(keyspace: String): () => Cluster = {

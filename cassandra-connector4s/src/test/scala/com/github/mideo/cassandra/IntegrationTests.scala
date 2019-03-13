@@ -1,12 +1,13 @@
-package com.github.mideo.cassandra.testing.support
+package com.github.mideo.cassandra
 
 import java.nio.file.{Files, Path, Paths}
 import java.util.UUID
 
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.mapping.{Mapper, Result}
-import com.github.mideo.cassandra.connector.repository.ConnectedRepository
+import com.github.mideo.cassandra.connector.repository.ConnectedKeyspace
 import com.github.mideo.cassandra.connector.{CassandraConnectorTest, TestUser, TestUserAccessor}
+import com.github.mideo.cassandra.testing.support.ConnectedInMemoryKeyspace
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -26,24 +27,24 @@ class IntegrationTests extends CassandraConnectorTest {
   Files.write(bootstrap, "CREATE KEYSPACE cassandra_connector WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 };".getBytes)
   Files.write(users_table, "CREATE TABLE cassandra_connector.users (user_id UUID , name text, PRIMARY KEY(user_id));".getBytes)
 
-  private val connectedRepository: ConnectedRepository = ConnectedInMemoryRepository.connect("cassandra_connector")
-  Await.result(connectedRepository.runMigrations(migrationsResourceDirectory), 5 minutes)
+  private val connectedKeyspace: ConnectedKeyspace = ConnectedInMemoryKeyspace.connect("cassandra_connector")
+  Await.result(connectedKeyspace.runMigrations(migrationsResourceDirectory), 5 minutes)
 
 
   override def afterAll(): Unit = {
-    connectedRepository.connectedSession.close
+    connectedKeyspace.close
   }
 
 
   "ConnectedInMemoryRepository" should "start EmbeddedDb" in {
-    ConnectedInMemoryRepository.EmbeddedCassandra.isRunning should be(true)
-    ConnectedInMemoryRepository.EmbeddedCassandra.runningPort should not equal null
-    ConnectedInMemoryRepository.EmbeddedCassandra.getHosts should equal(List("localhost"))
+    ConnectedInMemoryKeyspace.EmbeddedCassandra.isRunning should be(true)
+    ConnectedInMemoryKeyspace.EmbeddedCassandra.runningPort should not equal null
+    ConnectedInMemoryKeyspace.EmbeddedCassandra.getHosts should equal(List("localhost"))
   }
 
 
   "ConnectedInMemoryRepository" should "run migrations " in {
-    val result: ResultSet = Await.result(connectedRepository.connectedSession.session map {
+    val result: ResultSet = Await.result(connectedKeyspace.session map {
       s => {
         s.execute("USE cqlmigrate;")
         s.execute("Select * from locks;")
@@ -55,7 +56,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   "materialise repository " should " get data from repository" in {
-    val userMapper: Future[Mapper[TestUser]] = connectedRepository.repositoryMapper.materialise(classOf[TestUser])
+    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise(classOf[TestUser])
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
@@ -76,8 +77,8 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   it should " create accessor (getAll)" in {
-    val userMapper: Future[Mapper[TestUser]] = connectedRepository.repositoryMapper.materialise(classOf[TestUser])
-    val userAccesssor: Future[TestUserAccessor] = connectedRepository.repositoryMapper.materialiseAccessor(classOf[TestUserAccessor])
+    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise(classOf[TestUser])
+    val userAccesssor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor(classOf[TestUserAccessor])
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
@@ -99,8 +100,8 @@ class IntegrationTests extends CassandraConnectorTest {
 
   }
   it should " create accessor (truncate)" in {
-    val userMapper: Future[Mapper[TestUser]] = connectedRepository.repositoryMapper.materialise(classOf[TestUser])
-    val userAccesssor: Future[TestUserAccessor] = connectedRepository.repositoryMapper.materialiseAccessor(classOf[TestUserAccessor])
+    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise(classOf[TestUser])
+    val userAccesssor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor(classOf[TestUserAccessor])
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
@@ -127,7 +128,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   "materialise repository " should "delete data from repository" in {
-    val userMapper: Mapper[TestUser] = Await.result(connectedRepository.repositoryMapper.materialise(classOf[TestUser]), 5 seconds)
+    val userMapper: Mapper[TestUser] = Await.result(connectedKeyspace.materialise(classOf[TestUser]), 5 seconds)
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo1")
@@ -142,7 +143,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   "materialise repository " should "update data from repository" in {
-    val userMapper: Mapper[TestUser] = Await.result(connectedRepository.repositoryMapper.materialise(classOf[TestUser]), 5 seconds)
+    val userMapper: Mapper[TestUser] = Await.result(connectedKeyspace.materialise(classOf[TestUser]), 5 seconds)
 
     val pk = UUID.randomUUID
     val mideo2 = new TestUser(pk, "mide02")
