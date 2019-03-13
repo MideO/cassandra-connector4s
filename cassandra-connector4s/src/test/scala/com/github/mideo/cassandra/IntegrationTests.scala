@@ -61,9 +61,9 @@ class IntegrationTests extends CassandraConnectorTest {
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
 
-    userMapper.map {
+    Await.result(userMapper.map {
       _.save(mideo)
-    }
+    }, 10 seconds)
 
 
     val actual = Await.result(userMapper.map {
@@ -85,9 +85,9 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
 
-    userMapper.map {
+    Await.result(userMapper.map {
       _.save(mideo)
-    }
+    }, 10 seconds)
 
 
     val result: Result[TestUser] = Await.result(userAccesssor.map {
@@ -107,10 +107,9 @@ class IntegrationTests extends CassandraConnectorTest {
     val mideo = new TestUser(pk, "mideo")
 
 
-
-    userMapper.map {
+    Await.result(userMapper.map {
       _.save(mideo)
-    }
+    }, 10 seconds)
 
     Await.result(userAccesssor.map {
       _.truncate
