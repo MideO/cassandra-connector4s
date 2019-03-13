@@ -44,7 +44,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   "ConnectedInMemoryRepository" should "run migrations " in {
-    val result: ResultSet = Await.result(connectedKeyspace.session map {
+    val result: ResultSet = Await.result(connectedKeyspace.Session map {
       s => {
         s.execute("USE cqlmigrate;")
         s.execute("Select * from locks;")

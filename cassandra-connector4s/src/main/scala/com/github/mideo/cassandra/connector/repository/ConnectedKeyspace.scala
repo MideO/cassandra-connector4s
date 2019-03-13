@@ -4,34 +4,28 @@ import com.datastax.driver.core.{Cluster, Session}
 import com.datastax.driver.mapping.{Mapper, MappingManager}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent._
 
 
 sealed class ConnectedKeyspace(private val cluster: Cluster, private val keyspace: String) {
 
-  lazy val session: Future[Session] = cluster.connectAsync().asScala
+  lazy val Session: Future[Session] = cluster.connectAsync().asScala
 
-  def close: Future[Void] = {
-    cluster.closeAsync().asScala
-  }
-  def runMigrations(migrationsDirector:String): Future[Unit] = {
-     session map {
-      session => CqlMigration.run(session, keyspace, migrationsDirector)
-    }
-  }
-
-  private lazy val manager: Future[MappingManager] = session flatMap  { s =>
+  lazy val Manager: Future[MappingManager] = Session flatMap  { s =>
     s.executeAsync(s"USE $keyspace")
       .asScala map {
       _ => new MappingManager(s)
     }
   }
 
-  def materialise[T](t: Class[T]): Future[Mapper[T]] = manager map { m => m.mapper(t, keyspace) }
+  def close: Future[Void] = cluster.closeAsync().asScala
 
-  def materialiseAccessor[T](t: Class[T]) = manager map { m => m.createAccessor(t) }
+  def runMigrations(migrationsDirector:String): Future[Unit] = Session map { session => CqlMigration.run(session, keyspace, migrationsDirector) }
 
-  def getMappingManager: Future[MappingManager] = manager
+  def materialise[T](t: Class[T]): Future[Mapper[T]] = Manager map { m => m.mapper(t, keyspace) }
+
+  def materialiseAccessor[T](t: Class[T]): Future[T] = Manager map { m => m.createAccessor(t) }
+
 }
 
 object ConnectedKeyspace {

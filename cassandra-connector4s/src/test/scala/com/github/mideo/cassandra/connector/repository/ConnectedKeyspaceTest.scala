@@ -31,7 +31,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    Await.result(ConnectedKeyspace(() => cluster, "cassandra_connector").session, 1 seconds)
+    Await.result(ConnectedKeyspace(() => cluster, "cassandra_connector").Session, 1 seconds)
 
     // Then
     verify(cluster).connectAsync()
@@ -99,10 +99,10 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
     val keyspace = ConnectedKeyspace(() => cluster, "cassandra_connector")
-    val mappingManager = Await.result(keyspace.getMappingManager, 1 second)
+
 
     // Then
-    mappingManager.getSession should equal(session)
+    Await.result(keyspace.Manager, 1 second).getSession should equal(session)
   }
 
 
