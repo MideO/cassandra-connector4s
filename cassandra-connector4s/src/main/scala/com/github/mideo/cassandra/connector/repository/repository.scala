@@ -44,13 +44,5 @@ package object repository {
     }
   }
 
-  private[repository] implicit class PimpedJavaFuture[T](jFuture: java.util.concurrent.Future[T]) {
-    @tailrec final def asScala: Future[T] = {
-      if (jFuture.isDone || jFuture.isCancelled) return Future {
-        jFuture.get()
-      }
-      Thread.sleep(50)
-      asScala
-    }
-  }
+
 }

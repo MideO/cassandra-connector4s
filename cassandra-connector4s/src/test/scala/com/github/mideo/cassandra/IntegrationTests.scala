@@ -56,7 +56,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   "materialise repository " should " get data from repository" in {
-    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise(classOf[TestUser])
+    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise[TestUser]
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
@@ -77,8 +77,8 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   it should " create accessor (getAll)" in {
-    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise(classOf[TestUser])
-    val userAccesssor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor(classOf[TestUserAccessor])
+    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise[TestUser]
+    val userAccesssor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor[TestUserAccessor]
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
@@ -100,8 +100,8 @@ class IntegrationTests extends CassandraConnectorTest {
 
   }
   it should " create accessor (truncate)" in {
-    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise(classOf[TestUser])
-    val userAccesssor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor(classOf[TestUserAccessor])
+    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise[TestUser]
+    val userAccesssor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor[TestUserAccessor]
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
@@ -127,7 +127,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   "materialise repository " should "delete data from repository" in {
-    val userMapper: Mapper[TestUser] = Await.result(connectedKeyspace.materialise(classOf[TestUser]), 5 seconds)
+    val userMapper: Mapper[TestUser] = Await.result(connectedKeyspace.materialise[TestUser], 5 seconds)
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo1")
@@ -142,7 +142,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   "materialise repository " should "update data from repository" in {
-    val userMapper: Mapper[TestUser] = Await.result(connectedKeyspace.materialise(classOf[TestUser]), 5 seconds)
+    val userMapper: Mapper[TestUser] = Await.result(connectedKeyspace.materialise[TestUser], 5 seconds)
 
     val pk = UUID.randomUUID
     val mideo2 = new TestUser(pk, "mide02")

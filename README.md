@@ -65,7 +65,7 @@ val connectedKeyspace = ConnectedKeyspace.connect("cassandra_connector")
 connectedKeyspace.runMigrations("aGivenDirectoryWithDotCqlFiles")
 
 // Materialise a repository
-val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise(classOf[TestUser])
+val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise[TestUser]
 
 // Create an instance of repository entity
 val mideo = new User(UUID.randomUUID, "mideo")
@@ -82,7 +82,7 @@ userMapper.map { _.delete(mideo.userId) }
 
 
 // user custom accessor
-val accessor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor(classOf[TestUserAccessor])
+val accessor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor[TestUserAccessor]
 
 accessor.getAll
 

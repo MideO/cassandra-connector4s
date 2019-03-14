@@ -73,7 +73,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
     val keyspace = ConnectedKeyspace(() => cluster, "cassandra_connector")
-    val userMapper: Mapper[TestUser] = Await.result(keyspace.materialise(classOf[TestUser]), 1 second)
+    val userMapper: Mapper[TestUser] = Await.result(keyspace.materialise[TestUser], 1 second)
 
     // Then
     userMapper should not be null
@@ -82,7 +82,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
 
     //When
     when(keySpaceMetaData.getTable("address")).thenReturn(tableMetaData)
-    val addressMapper: Mapper[TestAddress] = Await.result(keyspace.materialise(classOf[TestAddress]), 1 second)
+    val addressMapper: Mapper[TestAddress] = Await.result(keyspace.materialise[TestAddress], 1 second)
 
 
     // Then
