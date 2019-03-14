@@ -1,15 +1,15 @@
 package com.github.mideo
 
-import java.util.{Comparator, UUID}
+import java.util.UUID
 
 import akka.actor.ActorSystem
 import com.datastax.driver.mapping.Mapper
-import com.github.mideo.repository.{RepositoryMapper, User, UserAccessor}
+import com.github.mideo.repository.{CassandraKeyspace, User, UserAccessor}
 import javax.inject.Singleton
 import org.codehaus.jackson.map.ObjectMapper
+import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json.JacksonJsonSupport
 import org.scalatra.{FutureSupport, ScalatraServlet}
-import org.json4s.{DefaultFormats, Formats}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,15 +24,16 @@ class UsersServlet
   }
 
   private implicit val system: ActorSystem = ActorSystem("ScalatraAppSystem")
-  private val futureMapper: Future[Mapper[User]] = RepositoryMapper.materialise(classOf[User])
- private val futureAccessor: Future[UserAccessor] = RepositoryMapper.materialiseAccessor(classOf[UserAccessor])
-  private val objectMapper: ObjectMapper = new ObjectMapper()
+  private lazy val mapperFuture: Future[Mapper[User]] = CassandraKeyspace.materialise(classOf[User])
+  private lazy val accessorFuture: Future[UserAccessor] = CassandraKeyspace.materialiseAccessor(classOf[UserAccessor])
+  private final val objectMapper: ObjectMapper = new ObjectMapper()
 
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
+
   override protected implicit def executor: ExecutionContext = system.dispatcher
 
   get("/user") {
-    futureMapper map {
+    mapperFuture map {
       mapper =>
         val uid = UUID.randomUUID()
         val user = new User(uid, "scalatraUser")
@@ -43,19 +44,20 @@ class UsersServlet
 
 
   get("/users") {
-    futureMapper map  {
+    mapperFuture map {
       mapper =>
         mapper.save(new User(UUID.randomUUID(), "scalatraUser1"))
         mapper.save(new User(UUID.randomUUID(), "scalatraUser2"))
-    } flatMap (
-      _ => futureAccessor map { accessor => objectMapper
-        .writeValueAsString({
-          val result = accessor.getAll.all()
-          result.sort((o1: User, o2: User) => o1.name.compareTo(o2.name))
-          result
-        })
+    } flatMap  (
+      _ => accessorFuture map { accessor =>
+        objectMapper
+          .writeValueAsString({
+            val result = accessor.getAll.all()
+            result.sort((o1: User, o2: User) => o1.name.compareTo(o2.name))
+            result
+          })
       }
-    )
+      )
   }
 
 }
