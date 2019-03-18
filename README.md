@@ -84,9 +84,10 @@ userMapper.map { _.delete(mideo.userId) }
 // user custom accessor
 val accessor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor[TestUserAccessor]
 
-accessor.getAll
+accessor.map { _.getAll }
 
-accessor.truncate
+accessor.map { _.truncate }
+
 
 ```
 
