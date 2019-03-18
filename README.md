@@ -96,6 +96,11 @@ accessor.truncate
 // Connect with the ConnectedInMemoryRepository object
 val connectedKeyspace: ConnectedKeyspace = ConnectedInMemoryKeyspace.connect("cassandra_connector")
 
-// embedded cassandra is started and off you go!
+val isRunning = EmbeddedCassandra.isRunning 
+
+val port = EmbeddedCassandra.runningPort 
+
+val hosts = EmbeddedCassandra.getHosts 
+
 
 ```

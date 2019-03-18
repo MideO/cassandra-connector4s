@@ -7,7 +7,7 @@ import com.datastax.driver.core.ResultSet
 import com.datastax.driver.mapping.{Mapper, Result}
 import com.github.mideo.cassandra.connector.repository.ConnectedKeyspace
 import com.github.mideo.cassandra.connector.{CassandraConnectorTest, TestUser, TestUserAccessor}
-import com.github.mideo.cassandra.testing.support.ConnectedInMemoryKeyspace
+import com.github.mideo.cassandra.testing.support.{ConnectedInMemoryKeyspace, EmbeddedCassandra}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -37,9 +37,9 @@ class IntegrationTests extends CassandraConnectorTest {
 
 
   "ConnectedInMemoryRepository" should "start EmbeddedDb" in {
-    ConnectedInMemoryKeyspace.EmbeddedCassandra.isRunning should be(true)
-    ConnectedInMemoryKeyspace.EmbeddedCassandra.runningPort should not equal null
-    ConnectedInMemoryKeyspace.EmbeddedCassandra.getHosts should equal(List("localhost"))
+    EmbeddedCassandra.isRunning should be(true)
+    EmbeddedCassandra.runningPort should not equal null
+    EmbeddedCassandra.getHosts should equal(List("localhost"))
   }
 
 

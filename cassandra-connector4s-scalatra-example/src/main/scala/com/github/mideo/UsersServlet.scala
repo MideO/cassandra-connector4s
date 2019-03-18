@@ -24,8 +24,8 @@ class UsersServlet
   }
 
   private implicit val system: ActorSystem = ActorSystem("ScalatraAppSystem")
-  private lazy val mapperFuture: Future[Mapper[User]] = CassandraKeyspace.materialise(classOf[User])
-  private lazy val accessorFuture: Future[UserAccessor] = CassandraKeyspace.materialiseAccessor(classOf[UserAccessor])
+  private lazy val mapperFuture: Future[Mapper[User]] = CassandraKeyspace.materialise[User]
+  private lazy val accessorFuture: Future[UserAccessor] = CassandraKeyspace.materialiseAccessor[UserAccessor]
   private final val objectMapper: ObjectMapper = new ObjectMapper()
 
   protected implicit lazy val jsonFormats: Formats = DefaultFormats

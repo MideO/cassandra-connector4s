@@ -9,6 +9,26 @@ import com.github.mideo.cassandra.connector.repository.{ClusterBuilder, Connecte
 import org.apache.cassandra.service.{CassandraDaemon, EmbeddedCassandraService}
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 
+object EmbeddedCassandra {
+
+  def startDb = EmbeddedCassandraServerHelper.startEmbeddedCassandra(EmbeddedCassandraServerHelper.CASSANDRA_RNDPORT_YML_FILE)
+
+  def isRunning: Boolean = Objects.nonNull(daemon) && daemon.isNativeTransportRunning
+
+  def runningPort = EmbeddedCassandraServerHelper.getNativeTransportPort
+
+  def getHosts = List(EmbeddedCassandraServerHelper.getHost)
+
+  private[support] val cassandraService = new EmbeddedCassandraService()
+
+  private def daemon: CassandraDaemon = {
+    val field: Field = classOf[EmbeddedCassandraServerHelper].getDeclaredField("cassandraDaemon")
+    field.setAccessible(true)
+    field.get(cassandraService).asInstanceOf[CassandraDaemon]
+  }
+}
+
+
 object ConnectedInMemoryKeyspace {
 
   def connect(keyspace: String): ConnectedKeyspace = {
@@ -25,24 +45,6 @@ object ConnectedInMemoryKeyspace {
     ClusterBuilder.fromConfig(repoConf).build()
   }
 
-  object EmbeddedCassandra {
-
-    def startDb = EmbeddedCassandraServerHelper.startEmbeddedCassandra(EmbeddedCassandraServerHelper.CASSANDRA_RNDPORT_YML_FILE)
-
-    def isRunning: Boolean = Objects.nonNull(daemon) && daemon.isNativeTransportRunning
-
-    def runningPort = EmbeddedCassandraServerHelper.getNativeTransportPort
-
-    def getHosts = List(EmbeddedCassandraServerHelper.getHost)
-
-    private[support] val cassandraService = new EmbeddedCassandraService()
-
-    private def daemon: CassandraDaemon = {
-      val field: Field = classOf[EmbeddedCassandraServerHelper].getDeclaredField("cassandraDaemon")
-      field.setAccessible(true)
-      field.get(cassandraService).asInstanceOf[CassandraDaemon]
-    }
-  }
 
 }
 
