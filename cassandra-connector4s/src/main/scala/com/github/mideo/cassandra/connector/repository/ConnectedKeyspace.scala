@@ -32,19 +32,16 @@ sealed class ConnectedKeyspace(private val cluster: Cluster, private val keyspac
 
   def close: Future[Void] = cluster.closeAsync().asScala
 
-  def runMigrations(migrationsDirector: String): Future[Unit] = Session map { session => CqlMigration.run(session, keyspace, migrationsDirector) }
+  def runMigrations(migrationsDirector: String): Future[Unit] = Session map { session => Migrations.migrate(session, keyspace, migrationsDirector) }
 
   def materialise[T: ClassTag]: Future[Mapper[T]] = Manager map { _.mapper(classTag[T].runtimeClass.asInstanceOf[Class[T]], keyspace)}
 
   def materialiseAccessor[T: ClassTag]: Future[T] = Manager map {_.createAccessor(classTag[T].runtimeClass.asInstanceOf[Class[T]])}
-
 }
 
 object ConnectedKeyspace {
-  private def defaultClusterSupplier: () => Cluster = () => ClusterBuilder.fromConfig().build()
-
-  def apply(clusterSupplier: () => Cluster = defaultClusterSupplier, keyspace: String): ConnectedKeyspace = {
-    new ConnectedKeyspace(clusterSupplier(), keyspace)
+  def apply(cluster: Cluster = ClusterBuilder.fromConfig().build(), keyspace: String): ConnectedKeyspace = {
+    new ConnectedKeyspace(cluster, keyspace)
   }
 }
 

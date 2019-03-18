@@ -13,16 +13,16 @@ object ConnectedInMemoryKeyspace {
 
   def connect(keyspace: String): ConnectedKeyspace = {
     EmbeddedCassandra.startDb
-    ConnectedKeyspace(clusterSupplier(keyspace), keyspace)
+    ConnectedKeyspace(buildCluster(keyspace), keyspace)
   }
 
-  def clusterSupplier(keyspace: String): () => Cluster = {
+  def buildCluster(keyspace: String): Cluster = {
     val repoConf = RepositoryConfiguration(
       keyspace,
       ConsistencyLevel.LOCAL_ONE,
       EmbeddedCassandra.runningPort,
       EmbeddedCassandra.getHosts)
-    () => ClusterBuilder.fromConfig(repoConf).build()
+    ClusterBuilder.fromConfig(repoConf).build()
   }
 
   object EmbeddedCassandra {

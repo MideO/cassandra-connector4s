@@ -9,12 +9,12 @@ import uk.sky.cqlmigrate.{CassandraLockConfig, CqlMigrator, CqlMigratorFactory}
 
 import scala.collection.JavaConverters._
 
-private [cassandra] object CqlMigration {
+private [cassandra] object Migrations {
 
   case class CqlMigrationException(private val message: String = "",
                                    private val cause: Throwable = None.orNull) extends RuntimeException(message, cause)
 
-  lazy val cqlMigrator: CqlMigrator = {
+  lazy val migrator: CqlMigrator = {
     val LockConfig: CassandraLockConfig = CassandraLockConfig
       .builder
       .withTimeout(Duration.ofSeconds(3))
@@ -23,7 +23,7 @@ private [cassandra] object CqlMigration {
     CqlMigratorFactory.create(LockConfig)
   }
 
-  def run(session: Session, keyspace:String, resourcePath: String, migrator: CqlMigrator = cqlMigrator): Unit = {
+  def migrate(session: Session, keyspace:String, resourcePath: String, migrator: CqlMigrator = migrator): Unit = {
     val url = this.getClass.getClassLoader.getResource(resourcePath)
     if (Objects.isNull(url)) throw CqlMigrationException(s"Resource path `$resourcePath` does not exist")
 

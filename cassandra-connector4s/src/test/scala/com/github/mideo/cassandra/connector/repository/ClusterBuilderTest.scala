@@ -12,7 +12,6 @@ class ClusterBuilderTest extends CassandraConnectorTest {
     cluster.getConfiguration.getSocketOptions.getConnectTimeoutMillis should equal(1000)
     cluster.getConfiguration.getSocketOptions.getReadTimeoutMillis should equal(5000)
     cluster.getConfiguration.getQueryOptions.getConsistencyLevel.name() should equal(ConsistencyLevel.LOCAL_QUORUM.name())
-
   }
 
 }
