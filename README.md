@@ -62,7 +62,7 @@ class User() {
 val connectedKeyspace = ConnectedKeyspace.connect("cassandra_connector")
 
 // Run migrations if required
-connectedKeyspace.runMigrations("aGivenDirectoryWithDotCqlFiles")
+Await.result(connectedKeyspace.runMigrations("aGivenDirectoryWithDotCqlFiles"), 1 minute)
 
 // Materialise a repository
 val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise[TestUser]
