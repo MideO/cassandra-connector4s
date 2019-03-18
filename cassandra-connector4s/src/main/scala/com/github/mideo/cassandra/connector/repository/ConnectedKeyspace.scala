@@ -11,7 +11,7 @@ import scala.reflect._
 
 sealed class ConnectedKeyspace(private val cluster: Cluster, private val keyspace: String) {
 
-  private[repository] implicit class PimpedJavaFuture[T](jFuture: java.util.concurrent.Future[T]) {
+  sealed implicit class PimpedJavaFuture[T](jFuture: java.util.concurrent.Future[T]) {
     @tailrec final def asScala: Future[T] = {
       if (jFuture.isDone || jFuture.isCancelled) return Future {
         jFuture.get()
