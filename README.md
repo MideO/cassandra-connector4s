@@ -22,6 +22,7 @@ cassandra-connector {
     keyspace: cassandra_connector
     port: 9402
     contactPoints: localhost
+    dc: dc-eu-west-1
   }
   session {
     consistencyLevel: local_quorum
@@ -60,6 +61,19 @@ class User() {
 ```scala
 // Create a connected repository
 val connectedKeyspace = ConnectedKeyspace.connect("cassandra_connector")
+
+
+//alternatively
+import com.github.mideo.cassandra.connector.fluent.Keyspace
+
+val connectedKeyspace = Keyspace.name("keyspace" )
+      .withUserName("mideo")
+      .withPassword("password")
+      .withConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM)
+      .withContactPoints(List("localhost"))
+      .onPort(9402)
+      .withDC("DC1")
+      .connect()
 
 // Run migrations if required
 Await.result(connectedKeyspace.runMigrations("aGivenDirectoryWithDotCqlFiles"), 1 minute)

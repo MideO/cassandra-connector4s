@@ -61,6 +61,8 @@ class IntegrationTests extends CassandraConnectorTest {
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
 
+    implicit def execture(x: Int) =
+      java.lang.Integer.valueOf(x)
     Await.result(userMapper.map {
       _.save(mideo)
     }, 10 seconds)
