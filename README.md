@@ -63,7 +63,7 @@ class User() {
 val connectedKeyspace = ConnectedKeyspace.connect("cassandra_connector")
 
 
-//alternatively
+//alternatively, initialise without config file
 import com.github.mideo.cassandra.connector.fluent.Keyspace
 
 val connectedKeyspace = Keyspace.name("keyspace" )
