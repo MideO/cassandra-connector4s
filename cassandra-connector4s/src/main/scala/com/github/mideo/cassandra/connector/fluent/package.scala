@@ -10,8 +10,8 @@ package object fluent {
 
   private val conf = mutable.Map.empty[String, Any]
 
-  object Keyspace {
-    def name(name: String): this.type = {
+  object Connector {
+    def keyspace(name: String): this.type = {
       conf("keyspace") = name
       this
     }

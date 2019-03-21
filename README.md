@@ -64,9 +64,9 @@ val connectedKeyspace = ConnectedKeyspace.connect("cassandra_connector")
 
 
 //alternatively, initialise without config file
-import com.github.mideo.cassandra.connector.fluent.Keyspace
+import com.github.mideo.cassandra.connector.fluent.Connector
 
-val connectedKeyspace = Keyspace.name("keyspace" )
+val connector = Connector.keyspace("keyspace" )
       .withUserName("mideo")
       .withPassword("password")
       .withConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM)
