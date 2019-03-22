@@ -46,7 +46,7 @@ package object fluent {
       this
     }
 
-    def connect(): ConnectedKeyspace = {
+    def create(): ConnectedKeyspace = {
       val repoConf = RepositoryConfiguration(
         conf("keyspace").asInstanceOf[String],
         conf("consistencyLevel").asInstanceOf[ConsistencyLevel],
@@ -56,7 +56,7 @@ package object fluent {
         ClusterDC(conf.get("dc").asInstanceOf[Option[String]])
       )
 
-      ConnectedKeyspace(ClusterBuilder.fromConfig(repoConf).build(), conf("keyspace").asInstanceOf[String])
+      ConnectedKeyspace(conf("keyspace").asInstanceOf[String], ClusterBuilder.fromConfig(repoConf).build())
 
     }
   }

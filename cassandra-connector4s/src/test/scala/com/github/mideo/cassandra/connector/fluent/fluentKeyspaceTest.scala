@@ -13,7 +13,7 @@ class fluentKeyspaceTest extends CassandraConnectorTest {
       .withContactPoints(List("localhost"))
       .onPort(9402)
       .withDC("DC1")
-      .connect() should not be None
+      .create() should not be None
   }
 
   "fluentKeyspace" should "provide connectedKeyspace without credentials" in {
@@ -22,7 +22,7 @@ class fluentKeyspaceTest extends CassandraConnectorTest {
       .withContactPoints(List("localhost"))
       .onPort(9402)
       .withDC("dc-eu-west-1")
-      .connect() should not be None
+      .create() should not be None
   }
 
   "fluentKeyspace" should "provide connectedKeyspace without credentials nor DC" in {
@@ -30,7 +30,7 @@ class fluentKeyspaceTest extends CassandraConnectorTest {
       .withConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM)
       .withContactPoints(List("localhost"))
       .onPort(9402)
-      .connect() should not be None
+      .create() should not be None
   }
 
 }

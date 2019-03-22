@@ -31,7 +31,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    Await.result(ConnectedKeyspace(cluster, "cassandra_connector").Session, 1 seconds)
+    Await.result(ConnectedKeyspace("cassandra_connector", cluster).Session, 1 seconds)
 
     // Then
     verify(cluster).connectAsync()
@@ -44,7 +44,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    val connectedRepository = ConnectedKeyspace(cluster, "cassandra_connector")
+    val connectedRepository = ConnectedKeyspace( "cassandra_connector", cluster)
     val migrate: Future[Unit] = connectedRepository.runMigrations("aGivenDirectoryWithDotCqlFiles")
 
     // Then
@@ -57,7 +57,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(closeFuture.isDone).thenReturn(true)
 
     // When
-    Await.result(ConnectedKeyspace(cluster, "cassandra_connector").close, 1 seconds)
+    Await.result(ConnectedKeyspace("cassandra_connector", cluster).close, 1 seconds)
 
     // Then
     verify(cluster).closeAsync()
@@ -72,7 +72,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
 
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
-    val keyspace = ConnectedKeyspace(cluster, "cassandra_connector")
+    val keyspace = ConnectedKeyspace("cassandra_connector", cluster)
     val userMapper: Mapper[TestUser] = Await.result(keyspace.materialise[TestUser], 1 second)
 
     // Then
@@ -98,7 +98,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
 
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
-    val keyspace = ConnectedKeyspace(cluster, "cassandra_connector")
+    val keyspace = ConnectedKeyspace("cassandra_connector", cluster)
 
 
     // Then

@@ -27,7 +27,7 @@ class IntegrationTests extends CassandraConnectorTest {
   Files.write(bootstrap, "CREATE KEYSPACE cassandra_connector WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 };".getBytes)
   Files.write(users_table, "CREATE TABLE cassandra_connector.users (user_id UUID , name text, PRIMARY KEY(user_id));".getBytes)
 
-  private val connectedKeyspace: ConnectedKeyspace = ConnectedInMemoryKeyspace.connect("cassandra_connector")
+  private val connectedKeyspace: ConnectedKeyspace = ConnectedInMemoryKeyspace("cassandra_connector")
   Await.result(connectedKeyspace.runMigrations(migrationsResourceDirectory), 5 minutes)
 
 
@@ -63,6 +63,7 @@ class IntegrationTests extends CassandraConnectorTest {
 
     implicit def execture(x: Int) =
       java.lang.Integer.valueOf(x)
+
     Await.result(userMapper.map {
       _.save(mideo)
     }, 10 seconds)
@@ -86,7 +87,6 @@ class IntegrationTests extends CassandraConnectorTest {
     val mideo = new TestUser(pk, "mideo")
 
 
-
     Await.result(userMapper.map {
       _.save(mideo)
     }, 10 seconds)
@@ -97,7 +97,7 @@ class IntegrationTests extends CassandraConnectorTest {
     }, 5 seconds)
 
 
-    (result.all().size()> 1) should equal(true)
+    (result.all().size() > 1) should equal(true)
 
 
   }

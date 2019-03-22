@@ -9,7 +9,7 @@ import scala.concurrent._
 import scala.reflect._
 
 
-sealed class ConnectedKeyspace(private val cluster: Cluster, private val keyspace: String) {
+sealed class ConnectedKeyspace(private val keyspace: String, private val cluster: Cluster) {
 
   sealed implicit class PimpedJavaFuture[T](jFuture: java.util.concurrent.Future[T]) {
     @tailrec final def asScala: Future[T] = {
@@ -40,8 +40,8 @@ sealed class ConnectedKeyspace(private val cluster: Cluster, private val keyspac
 }
 
 object ConnectedKeyspace {
-  def apply(cluster: Cluster = ClusterBuilder.fromConfig().build(), keyspace: String): ConnectedKeyspace = {
-    new ConnectedKeyspace(cluster, keyspace)
+  def apply(keyspace: String, cluster: Cluster = ClusterBuilder.fromConfig().build()): ConnectedKeyspace = {
+    new ConnectedKeyspace(keyspace, cluster)
   }
 }
 

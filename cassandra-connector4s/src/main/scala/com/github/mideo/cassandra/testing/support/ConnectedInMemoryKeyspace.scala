@@ -31,9 +31,9 @@ object EmbeddedCassandra {
 
 object ConnectedInMemoryKeyspace {
 
-  def connect(keyspace: String): ConnectedKeyspace = {
+  def apply(keyspace: String): ConnectedKeyspace = {
     EmbeddedCassandra.startDb
-    ConnectedKeyspace(buildCluster(keyspace), keyspace)
+    ConnectedKeyspace( keyspace, buildCluster(keyspace))
   }
 
   def buildCluster(keyspace: String): Cluster = {

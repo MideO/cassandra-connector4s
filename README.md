@@ -59,23 +59,25 @@ class User() {
 
 ##### Perform CRUD Ops
 ```scala
-// Create a connected repository
-val connectedKeyspace = ConnectedKeyspace.connect("cassandra_connector")
+// Either Create a connected Keyspace from the above config
+val connectedKeyspace = ConnectedKeyspace("cassandra_connector")
 
 
-//alternatively, initialise without config file
+//Or alternatively, initialise without config file
 import com.github.mideo.cassandra.connector.fluent.Connector
 
-val connector = Connector.keyspace("keyspace" )
+val connectedKeyspace = Connector.keyspace("keyspace" )
       .withUserName("mideo")
       .withPassword("password")
       .withConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM)
       .withContactPoints(List("localhost"))
       .onPort(9402)
       .withDC("DC1")
-      .connect()
+      .create()
 
-// Run migrations if required
+
+
+// Run migrations if needed
 Await.result(connectedKeyspace.runMigrations("aGivenDirectoryWithDotCqlFiles"), 1 minute)
 
 // Materialise a repository
