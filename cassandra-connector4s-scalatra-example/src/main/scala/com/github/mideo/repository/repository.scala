@@ -1,17 +1,24 @@
 package com.github.mideo
 
+import com.datastax.driver.core.ConsistencyLevel
+import com.github.mideo.cassandra.connector.fluent.Connector
 import com.github.mideo.cassandra.connector.repository.ConnectedKeyspace
-import com.github.mideo.cassandra.testing.support.ConnectedInMemoryKeyspace
+import com.github.mideo.cassandra.testing.support.{ConnectedInMemoryKeyspace, EmbeddedCassandra}
 
 import scala.concurrent.Await
-import concurrent.duration._
+import scala.concurrent.duration._
 
 
 package object repository {
+  //Not needed it real cassandra is running
+  EmbeddedCassandra.startDb
 
-  // if connecting to real database, define cassandra-connector.conf resources directory and user ConnectedSession
-  // val c: ConnectedRepository = ConnectedRepository(keyspace="cassandra_connector")
-  val CassandraKeyspace: ConnectedKeyspace = ConnectedInMemoryKeyspace("cassandra_connector")
-  // easier to block, as migrations need to run successfully
+  val CassandraKeyspace: ConnectedKeyspace = Connector
+      .keyspace("cassandra_connector")
+    .onPort(EmbeddedCassandra.runningPort)
+    .withConsistencyLevel(ConsistencyLevel.LOCAL_ONE)
+    .withContactPoints(EmbeddedCassandra.getHosts)
+    .create()
+  // can be run async but we block for this example.
   Await.result(CassandraKeyspace.runMigrations("migrations"), 5 minutes)
 }
