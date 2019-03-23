@@ -22,7 +22,7 @@ cassandra-connector {
     keyspace: cassandra_connector
     port: 9402
     contactPoints: localhost
-    dc: dc-eu-west-1
+    dc: DC1
   }
   session {
     consistencyLevel: local_quorum
