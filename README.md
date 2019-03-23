@@ -111,7 +111,7 @@ accessor.map { _.truncate }
 
 ```scala
 // Connect with the ConnectedInMemoryRepository object
-val connectedKeyspace: ConnectedKeyspace = ConnectedInMemoryKeyspace.connect("cassandra_connector")
+val connectedKeyspace: ConnectedKeyspace = ConnectedInMemoryKeyspace("cassandra_connector")
 
 val isRunning = EmbeddedCassandra.isRunning 
 
