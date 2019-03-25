@@ -73,7 +73,7 @@ val connectedKeyspace = Connector.keyspace("keyspace" )
       .withContactPoints(List("localhost"))
       .onPort(9402)
       .withDC("DC1")
-      .create()
+      .connect()
 
 
 

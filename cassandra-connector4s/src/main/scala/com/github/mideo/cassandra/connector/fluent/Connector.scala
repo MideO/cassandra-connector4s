@@ -45,7 +45,7 @@ object Connector {
     this
   }
 
-  def create(): ConnectedKeyspace = {
+  def connect(): ConnectedKeyspace = {
     val repoConf = RepositoryConfiguration(
       conf("keyspace").asInstanceOf[String],
       conf("consistencyLevel").asInstanceOf[ConsistencyLevel],
