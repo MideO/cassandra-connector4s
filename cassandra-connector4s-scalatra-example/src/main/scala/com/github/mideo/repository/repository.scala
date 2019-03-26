@@ -3,7 +3,7 @@ package com.github.mideo
 import com.datastax.driver.core.ConsistencyLevel
 import com.github.mideo.cassandra.connector.fluent.Connector
 import com.github.mideo.cassandra.connector.repository.ConnectedKeyspace
-import com.github.mideo.cassandra.testing.support.{ConnectedInMemoryKeyspace, EmbeddedCassandra}
+import com.github.mideo.cassandra.testing.support.EmbeddedCassandra
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -14,11 +14,11 @@ package object repository {
   EmbeddedCassandra.startDb
 
   val CassandraKeyspace: ConnectedKeyspace = Connector
-      .keyspace("cassandra_connector")
+    .keyspace("cassandra_connector")
     .onPort(EmbeddedCassandra.runningPort)
     .withConsistencyLevel(ConsistencyLevel.LOCAL_ONE)
     .withContactPoints(EmbeddedCassandra.getHosts)
-    .create()
+    .connect()
   // can be run async but we block for this example.
   Await.result(CassandraKeyspace.runMigrations("migrations"), 5 minutes)
 }
