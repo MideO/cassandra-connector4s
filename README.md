@@ -81,10 +81,10 @@ val connectedKeyspace = Connector.keyspace("keyspace" )
 
 
 // create a connectedTable
-val futureConnectedTable: Future[ConnectedTable[TestUser, TestUserAccessor]] = connectedKeyspace.materialise[TestUser, TestUserAccessor]
+val futureTable: Future[ConnectedTable[TestUser, TestUserAccessor]] = connectedKeyspace.materialise[TestUser, TestUserAccessor]
 
 
- futureConnectedTable map {
+ futureTable map {
       table => table.accessor.truncate
                 table.mapper.save(new User(UUID.randomUUID, "mideo"))
                 table.accessor.getAll
