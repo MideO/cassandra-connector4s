@@ -5,20 +5,23 @@ import com.github.mideo.cassandra.connector.fluent.Connector
 import com.github.mideo.cassandra.connector.repository.ConnectedKeyspace
 import com.github.mideo.cassandra.testing.support.EmbeddedCassandra
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
 package object repository {
-  //Not needed it real cassandra is running
   EmbeddedCassandra.startDb
 
-  val CassandraKeyspace: ConnectedKeyspace = Connector
-    .keyspace("cassandra_connector")
-    .onPort(EmbeddedCassandra.runningPort)
-    .withConsistencyLevel(ConsistencyLevel.LOCAL_ONE)
-    .withContactPoints(EmbeddedCassandra.getHosts)
-    .connect()
-  // can be run async but we block for this example.
-  Await.result(CassandraKeyspace.runMigrations("migrations"), 5 minutes)
+  val CassandraKeyspace: Future[ConnectedKeyspace] = for {
+      c <- Future {
+        Connector
+          .keyspace("cassandra_connector")
+          .onPort(EmbeddedCassandra.runningPort)
+          .withConsistencyLevel(ConsistencyLevel.LOCAL_ONE)
+          .withContactPoints(EmbeddedCassandra.getHosts)
+          .connect()
+      }
+      _ <- c.runMigrations("migrations")
+    } yield c
+
 }

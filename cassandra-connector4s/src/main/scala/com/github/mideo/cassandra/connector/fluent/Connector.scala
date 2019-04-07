@@ -2,9 +2,10 @@ package com.github.mideo.cassandra.connector.fluent
 
 import com.datastax.driver.core.ConsistencyLevel
 import com.github.mideo.cassandra.connector.configuration.{ClusterCredentials, ClusterDC, RepositoryConfiguration}
-import com.github.mideo.cassandra.connector.repository.{ClusterBuilder, ConnectedKeyspace}
+import com.github.mideo.cassandra.connector.repository.{ConnectedKeyspace, DefaultCluster}
 
 import scala.collection.mutable
+import scala.concurrent.Future
 
 
 object Connector {
@@ -44,8 +45,12 @@ object Connector {
     conf("dc") = dc
     this
   }
+  def withMigrationsDirectory(directory:String): this.type  = {
+    conf("migrationsDirectory") = directory
+    this
+  }
 
-  def connect(): ConnectedKeyspace = {
+  def connect(): Future[ConnectedKeyspace] = {
     val repoConf = RepositoryConfiguration(
       conf("keyspace").asInstanceOf[String],
       conf("consistencyLevel").asInstanceOf[ConsistencyLevel],
@@ -55,7 +60,10 @@ object Connector {
       ClusterDC(conf.get("dc").asInstanceOf[Option[String]])
     )
 
-    ConnectedKeyspace(conf("keyspace").asInstanceOf[String], ClusterBuilder.fromConfig(repoConf).build())
+    ConnectedKeyspace(
+      conf("keyspace").asInstanceOf[String],
+      DefaultCluster.fromConfig(repoConf).build(),
+      conf.get("migrationsDirectory").asInstanceOf[Option[String]])
 
   }
 }

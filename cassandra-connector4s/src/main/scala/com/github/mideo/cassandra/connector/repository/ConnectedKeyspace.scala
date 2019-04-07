@@ -23,25 +23,42 @@ sealed class ConnectedKeyspace(private val keyspace: String, private val cluster
 
   lazy val Session: Future[Session] = cluster.connectAsync().asScala
 
-  lazy val Manager: Future[MappingManager] = Session flatMap { s =>
-    s.executeAsync(s"USE $keyspace")
-      .asScala map {
-      _ => new MappingManager(s)
-    }
-  }
+  lazy val Manager: Future[MappingManager] = for {
+    session <- Session
+    _ <- session.executeAsync(s"USE $keyspace").asScala
+  } yield new MappingManager(session)
+
 
   def close: Future[Void] = cluster.closeAsync().asScala
 
   def runMigrations(migrationsDirector: String): Future[Unit] = Session map { session => Migrations.migrate(session, keyspace, migrationsDirector) }
 
-  def materialise[T: ClassTag]: Future[Mapper[T]] = Manager map { _.mapper(classTag[T].runtimeClass.asInstanceOf[Class[T]], keyspace)}
+  def materialise[T: ClassTag]: Future[Mapper[T]] = Manager map {
+    _.mapper(classTag[T].runtimeClass.asInstanceOf[Class[T]], keyspace)
+  }
 
-  def materialiseAccessor[T: ClassTag]: Future[T] = Manager map {_.createAccessor(classTag[T].runtimeClass.asInstanceOf[Class[T]])}
+  def materialiseAccessor[T: ClassTag]: Future[T] = Manager map {
+    _.createAccessor(classTag[T].runtimeClass.asInstanceOf[Class[T]])
+  }
+
+  def materialise[Mapped: ClassTag, Accessor: ClassTag]: Future[ConnectedTable[Mapped, Accessor]] =
+    Manager map {
+      m =>
+        ConnectedTable(
+          m.mapper(classTag[Mapped].runtimeClass.asInstanceOf[Class[Mapped]], keyspace),
+          m.createAccessor(classTag[Accessor].runtimeClass.asInstanceOf[Class[Accessor]])
+        )
+    }
 }
 
+sealed case class ConnectedTable[T, K](mapper: Mapper[T], accessor: K)
+
 object ConnectedKeyspace {
-  def apply(keyspace: String, cluster: Cluster = ClusterBuilder.fromConfig().build()): ConnectedKeyspace = {
-    new ConnectedKeyspace(keyspace, cluster)
-  }
+  def apply(keyspace: String, cluster: Cluster = DefaultCluster.fromConfig().build(), migrationsDirector: Option[String] = None): Future[ConnectedKeyspace] = for {
+    c <- Future {
+      new ConnectedKeyspace(keyspace, cluster)
+    }
+    _ <- if(migrationsDirector.isEmpty) Future {} else c.runMigrations(migrationsDirector.get)
+  } yield c
 }
 

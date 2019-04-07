@@ -59,8 +59,11 @@ class User() {
 
 ##### Perform CRUD Ops
 ```scala
-// Either Create a connected Keyspace from the above config
+// Either Create a connected Keyspace from the above config without cql migration
 val connectedKeyspace = ConnectedKeyspace("cassandra_connector")
+
+// or with cql migration if needed
+val connectedKeyspace = ConnectedKeyspace("cassandra_connector", "aGivenDirectoryWithDotCqlFiles")
 
 
 //Or alternatively, initialise without config file
@@ -73,14 +76,21 @@ val connectedKeyspace = Connector.keyspace("keyspace" )
       .withContactPoints(List("localhost"))
       .onPort(9402)
       .withDC("DC1")
+      .withMigrationsDirectory("aGivenDirectoryWithDotCqlFiles")
       .connect()
 
 
+// create a connectedTable
+val futureConnectedTable: Future[ConnectedTable[TestUser, TestUserAccessor]] = connectedKeyspace.materialise[TestUser, TestUserAccessor]
 
-// Run migrations if needed
-Await.result(connectedKeyspace.runMigrations("aGivenDirectoryWithDotCqlFiles"), 1 minute)
 
-// Materialise a repository
+ futureConnectedTable map {
+      table => table.accessor.truncate
+                table.mapper.save(new User(UUID.randomUUID, "mideo"))
+                table.accessor.getAll
+      } 
+
+// alternatively create a repository
 val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise[TestUser]
 
 // Create an instance of repository entity
@@ -97,7 +107,7 @@ userMapper.map { _.get(mideo.userId) }
 userMapper.map { _.delete(mideo.userId) }
 
 
-// user custom accessor
+// alternatively  user custom accessor
 val accessor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor[TestUserAccessor]
 
 accessor.map { _.getAll }

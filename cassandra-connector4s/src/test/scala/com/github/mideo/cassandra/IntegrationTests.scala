@@ -5,7 +5,7 @@ import java.util.UUID
 
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.mapping.{Mapper, Result}
-import com.github.mideo.cassandra.connector.repository.ConnectedKeyspace
+import com.github.mideo.cassandra.connector.repository.{ConnectedKeyspace, ConnectedTable}
 import com.github.mideo.cassandra.connector.{CassandraConnectorTest, TestUser, TestUserAccessor}
 import com.github.mideo.cassandra.testing.support.{ConnectedInMemoryKeyspace, EmbeddedCassandra}
 
@@ -27,8 +27,8 @@ class IntegrationTests extends CassandraConnectorTest {
   Files.write(bootstrap, "CREATE KEYSPACE cassandra_connector WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 };".getBytes)
   Files.write(users_table, "CREATE TABLE cassandra_connector.users (user_id UUID , name text, PRIMARY KEY(user_id));".getBytes)
 
-  private val connectedKeyspace: ConnectedKeyspace = ConnectedInMemoryKeyspace("cassandra_connector")
-  Await.result(connectedKeyspace.runMigrations(migrationsResourceDirectory), 5 minutes)
+  private val connectedKeyspace: ConnectedKeyspace = Await.result(ConnectedInMemoryKeyspace("cassandra_connector", Some(migrationsResourceDirectory)),
+    5 minutes)
 
 
   override def afterAll(): Unit = {
@@ -102,24 +102,20 @@ class IntegrationTests extends CassandraConnectorTest {
 
   }
   it should " create accessor (truncate)" in {
-    val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise[TestUser]
-    val userAccesssor: Future[TestUserAccessor] = connectedKeyspace.materialiseAccessor[TestUserAccessor]
+    val futureConnectedTable: Future[ConnectedTable[TestUser, TestUserAccessor]] = connectedKeyspace.materialise[TestUser, TestUserAccessor]
+
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
 
 
-    Await.result(userMapper.map {
-      _.save(mideo)
-    }, 10 seconds)
-
-    Await.result(userAccesssor.map {
-      _.truncate
-    }, 5 seconds)
-
-    val result: Result[TestUser] = Await.result(userAccesssor.map {
-      _.getAll
-    }, 5 seconds)
+    val result: Result[TestUser] = Await.result(
+      for {
+        table <- futureConnectedTable
+        _ <- Future{table.mapper.save(mideo)}
+        _ <- Future{table.accessor.truncate}
+      } yield table.accessor.getAll,
+      10 seconds)
 
 
     result.all().size() should equal(0)

@@ -24,8 +24,15 @@ class UsersServlet
   }
 
   private implicit val system: ActorSystem = ActorSystem("ScalatraAppSystem")
-  private lazy val mapperFuture: Future[Mapper[User]] = CassandraKeyspace.materialise[User]
-  private lazy val accessorFuture: Future[UserAccessor] = CassandraKeyspace.materialiseAccessor[UserAccessor]
+
+  case class DbTable(mapper: Mapper[User], accessor: UserAccessor)
+
+  val futureDbTable: Future[DbTable] = for {
+    c <- CassandraKeyspace
+    mapper <- c.materialise[User]
+    accessor <- c.materialiseAccessor[UserAccessor]
+  } yield DbTable(mapper, accessor)
+
   private final val objectMapper: ObjectMapper = new ObjectMapper()
 
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
@@ -33,31 +40,26 @@ class UsersServlet
   override protected implicit def executor: ExecutionContext = system.dispatcher
 
   get("/user") {
-    mapperFuture map {
-      mapper =>
+    futureDbTable map {
+      dbTable =>
         val uid = UUID.randomUUID()
         val user = new User(uid, "scalatraUser")
-        mapper.save(user)
-        objectMapper.writeValueAsString(mapper.get(uid))
+        dbTable.mapper.save(user)
+        objectMapper.writeValueAsString(dbTable.mapper.get(uid))
     }
   }
 
 
   get("/users") {
-    mapperFuture map {
-      mapper =>
-        mapper.save(new User(UUID.randomUUID(), "scalatraUser1"))
-        mapper.save(new User(UUID.randomUUID(), "scalatraUser2"))
-    } flatMap  (
-      _ => accessorFuture map { accessor =>
-        objectMapper
-          .writeValueAsString({
-            val result = accessor.getAll.all()
-            result.sort((o1: User, o2: User) => o1.name.compareTo(o2.name))
-            result
-          })
-      }
-      )
+    futureDbTable map {
+      dbTable =>
+        dbTable.mapper.save(new User(UUID.randomUUID(), "scalatraUser1"))
+        dbTable.mapper.save(new User(UUID.randomUUID(), "scalatraUser2"))
+        val result = dbTable.accessor.getAll.all()
+        result.sort((o1: User, o2: User) => o1.name.compareTo(o2.name))
+        objectMapper.writeValueAsString(result)
+    }
+
   }
 
 }

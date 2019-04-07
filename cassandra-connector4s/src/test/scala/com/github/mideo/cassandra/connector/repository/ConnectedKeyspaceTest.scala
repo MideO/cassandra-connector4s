@@ -31,7 +31,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    Await.result(ConnectedKeyspace("cassandra_connector", cluster).Session, 1 seconds)
+    Await.result(Await.result(ConnectedKeyspace("cassandra_connector", cluster), 1 seconds).Session, 1 seconds)
 
     // Then
     verify(cluster).connectAsync()
@@ -44,11 +44,11 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    val connectedRepository = ConnectedKeyspace( "cassandra_connector", cluster)
-    val migrate: Future[Unit] = connectedRepository.runMigrations("aGivenDirectoryWithDotCqlFiles")
+    val connectedRepository: Future[ConnectedKeyspace] = ConnectedKeyspace( "cassandra_connector", cluster, Some("aGivenDirectoryWithDotCqlFiles"))
+
 
     // Then
-    migrate.isInstanceOf[Future[Unit]] should be(true)
+    connectedRepository.isInstanceOf[Future[ConnectedKeyspace] ] should be(true)
   }
 
   "ConnectedRepository" should "close repository session" in {
@@ -57,7 +57,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(closeFuture.isDone).thenReturn(true)
 
     // When
-    Await.result(ConnectedKeyspace("cassandra_connector", cluster).close, 1 seconds)
+    Await.result(Await.result(ConnectedKeyspace("cassandra_connector", cluster), 1 second).close, 1 seconds)
 
     // Then
     verify(cluster).closeAsync()
@@ -72,7 +72,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
 
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
-    val keyspace = ConnectedKeyspace("cassandra_connector", cluster)
+    val keyspace = Await.result(ConnectedKeyspace("cassandra_connector", cluster), 1 second)
     val userMapper: Mapper[TestUser] = Await.result(keyspace.materialise[TestUser], 1 second)
 
     // Then
@@ -98,7 +98,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
 
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
-    val keyspace = ConnectedKeyspace("cassandra_connector", cluster)
+    val keyspace = Await.result(ConnectedKeyspace("cassandra_connector", cluster), 1 second)
 
 
     // Then

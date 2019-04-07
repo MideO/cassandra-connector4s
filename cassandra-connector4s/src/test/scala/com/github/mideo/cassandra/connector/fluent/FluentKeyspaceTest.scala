@@ -3,7 +3,7 @@ package com.github.mideo.cassandra.connector.fluent
 import com.datastax.driver.core.ConsistencyLevel
 import com.github.mideo.cassandra.connector.CassandraConnectorTest
 
-class fluentKeyspaceTest extends CassandraConnectorTest {
+class FluentKeyspaceTest extends CassandraConnectorTest {
 
   "fluentKeyspace" should "provide connectedKeyspace" in {
     Connector.keyspace("keyspace" )
@@ -13,6 +13,7 @@ class fluentKeyspaceTest extends CassandraConnectorTest {
       .withContactPoints(List("localhost"))
       .onPort(9402)
       .withDC("DC1")
+      .withMigrationsDirectory("aGiveDirectory")
       .connect() should not be None
   }
 

@@ -5,9 +5,11 @@ import java.util.Objects
 
 import com.datastax.driver.core.{Cluster, ConsistencyLevel}
 import com.github.mideo.cassandra.connector.configuration.RepositoryConfiguration
-import com.github.mideo.cassandra.connector.repository.{ClusterBuilder, ConnectedKeyspace}
+import com.github.mideo.cassandra.connector.repository.{ConnectedKeyspace, DefaultCluster}
 import org.apache.cassandra.service.{CassandraDaemon, EmbeddedCassandraService}
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
+
+import scala.concurrent.Future
 
 object EmbeddedCassandra {
 
@@ -31,9 +33,9 @@ object EmbeddedCassandra {
 
 object ConnectedInMemoryKeyspace {
 
-  def apply(keyspace: String): ConnectedKeyspace = {
+  def apply(keyspace: String, migrationsDirector:Option[String]=None): Future[ConnectedKeyspace] = {
     EmbeddedCassandra.startDb
-    ConnectedKeyspace( keyspace, buildCluster(keyspace))
+    ConnectedKeyspace( keyspace, buildCluster(keyspace), migrationsDirector)
   }
 
   def buildCluster(keyspace: String): Cluster = {
@@ -42,7 +44,7 @@ object ConnectedInMemoryKeyspace {
       ConsistencyLevel.LOCAL_ONE,
       EmbeddedCassandra.runningPort,
       EmbeddedCassandra.getHosts)
-    ClusterBuilder.fromConfig(repoConf).build()
+    DefaultCluster.fromConfig(repoConf).build()
   }
 
 
