@@ -54,7 +54,7 @@ sealed class ConnectedKeyspace(private val keyspace: String, private val cluster
 sealed case class ConnectedTable[T, K](mapper: Mapper[T], accessor: K)
 
 object ConnectedKeyspace {
-  def apply(keyspace: String, cluster: Cluster = DefaultCluster.fromConfig().build(), migrationsDirector: Option[String] = None): Future[ConnectedKeyspace] = for {
+  def apply(keyspace: String, migrationsDirector: Option[String] = None)(implicit cluster: Cluster = DefaultCluster.fromConfig().build()): Future[ConnectedKeyspace] = for {
     c <- Future {
       new ConnectedKeyspace(keyspace, cluster)
     }

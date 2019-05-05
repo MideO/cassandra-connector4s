@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 
 
 class ConnectedKeyspaceTest extends CassandraConnectorTest {
-  val cluster: Cluster = mock[Cluster]
+  implicit val  cluster: Cluster = mock[Cluster]
   val listenableFuture: ListenableFuture[Session] = mock[ListenableFuture[Session]]
   val closeFuture: CloseFuture = mock[CloseFuture]
 
@@ -31,7 +31,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    Await.result(Await.result(ConnectedKeyspace("cassandra_connector", cluster), 1 seconds).Session, 1 seconds)
+    Await.result(Await.result(ConnectedKeyspace("cassandra_connector"), 1 seconds).Session, 1 seconds)
 
     // Then
     verify(cluster).connectAsync()
@@ -44,7 +44,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(cluster.connectAsync()).thenReturn(listenableFuture)
 
     // When
-    val connectedRepository: Future[ConnectedKeyspace] = ConnectedKeyspace( "cassandra_connector", cluster, Some("aGivenDirectoryWithDotCqlFiles"))
+    val connectedRepository: Future[ConnectedKeyspace] = ConnectedKeyspace( "cassandra_connector", Some("aGivenDirectoryWithDotCqlFiles"))
 
 
     // Then
@@ -57,7 +57,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
     when(closeFuture.isDone).thenReturn(true)
 
     // When
-    Await.result(Await.result(ConnectedKeyspace("cassandra_connector", cluster), 1 second).close, 1 seconds)
+    Await.result(Await.result(ConnectedKeyspace("cassandra_connector"), 1 second).close, 1 seconds)
 
     // Then
     verify(cluster).closeAsync()
@@ -72,7 +72,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
 
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
-    val keyspace = Await.result(ConnectedKeyspace("cassandra_connector", cluster), 1 second)
+    val keyspace = Await.result(ConnectedKeyspace("cassandra_connector"), 1 second)
     val userMapper: Mapper[TestUser] = Await.result(keyspace.materialise[TestUser], 1 second)
 
     // Then
@@ -98,7 +98,7 @@ class ConnectedKeyspaceTest extends CassandraConnectorTest {
 
     // When
     when(keySpaceMetaData.getTable("users")).thenReturn(tableMetaData)
-    val keyspace = Await.result(ConnectedKeyspace("cassandra_connector", cluster), 1 second)
+    val keyspace = Await.result(ConnectedKeyspace("cassandra_connector"), 1 second)
 
 
     // Then

@@ -1,9 +1,8 @@
 package com.github.mideo.cassandra.connector
 
-import com.typesafe.config.{Config, ConfigException, ConfigFactory, ConfigValueFactory}
+import com.typesafe.config.{Config, ConfigException, ConfigFactory}
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 package object configuration {
 
@@ -18,8 +17,8 @@ package object configuration {
   }
 
 
-  private[configuration] abstract class OptionalConfiguration(optionals:Option[String]*) {
-    def isDefined:Boolean ={
+  private[configuration] abstract class OptionalConfiguration(optionals: Option[String]*) {
+    def isDefined: Boolean = {
       optionals.nonEmpty && optionals.forall(_.isDefined)
     }
   }
@@ -45,4 +44,5 @@ package object configuration {
       }
     }
   }
+
 }

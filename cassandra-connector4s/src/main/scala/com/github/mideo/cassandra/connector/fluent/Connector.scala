@@ -1,6 +1,6 @@
 package com.github.mideo.cassandra.connector.fluent
 
-import com.datastax.driver.core.ConsistencyLevel
+import com.datastax.driver.core.{Cluster, ConsistencyLevel}
 import com.github.mideo.cassandra.connector.configuration.{ClusterCredentials, ClusterDC, RepositoryConfiguration}
 import com.github.mideo.cassandra.connector.repository.{ConnectedKeyspace, DefaultCluster}
 
@@ -45,7 +45,8 @@ object Connector {
     conf("dc") = dc
     this
   }
-  def withMigrationsDirectory(directory:String): this.type  = {
+
+  def withMigrationsDirectory(directory: String): this.type = {
     conf("migrationsDirectory") = directory
     this
   }
@@ -59,10 +60,9 @@ object Connector {
       ClusterCredentials(conf.get("username").asInstanceOf[Option[String]], conf.get("password").asInstanceOf[Option[String]]),
       ClusterDC(conf.get("dc").asInstanceOf[Option[String]])
     )
-
+    implicit val cluster: Cluster = DefaultCluster.fromConfig(repoConf).build()
     ConnectedKeyspace(
       conf("keyspace").asInstanceOf[String],
-      DefaultCluster.fromConfig(repoConf).build(),
       conf.get("migrationsDirectory").asInstanceOf[Option[String]])
 
   }
