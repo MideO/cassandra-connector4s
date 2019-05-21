@@ -55,14 +55,13 @@ class IntegrationTests extends CassandraConnectorTest {
   }
 
 
-  "materialise repository " should " get data from repository" in {
+  "materialise repository" should "get data from repository" in {
     val userMapper: Future[Mapper[TestUser]] = connectedKeyspace.materialise[TestUser]
 
     val pk = UUID.randomUUID
     val mideo = new TestUser(pk, "mideo")
 
-    implicit def execture(x: Int) =
-      java.lang.Integer.valueOf(x)
+    implicit def intToInteger(x: Int) = java.lang.Integer.valueOf(x)
 
     Await.result(userMapper.map {
       _.save(mideo)

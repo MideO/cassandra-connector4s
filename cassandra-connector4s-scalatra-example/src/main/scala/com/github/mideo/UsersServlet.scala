@@ -42,6 +42,7 @@ class UsersServlet
   get("/user") {
     futureDbTable map {
       dbTable =>
+        dbTable.accessor.truncate
         val uid = UUID.randomUUID()
         val user = new User(uid, "scalatraUser")
         dbTable.mapper.save(user)
@@ -53,6 +54,7 @@ class UsersServlet
   get("/users") {
     futureDbTable map {
       dbTable =>
+        dbTable.accessor.truncate
         dbTable.mapper.save(new User(UUID.randomUUID(), "scalatraUser1"))
         dbTable.mapper.save(new User(UUID.randomUUID(), "scalatraUser2"))
         val result = dbTable.accessor.getAll.all()

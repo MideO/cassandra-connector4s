@@ -16,7 +16,7 @@ class UsersServletTests extends ScalatraFunSuite {
     get("/users") {
       status should equal (200)
       response.getContentType() should equal("application/json;charset=utf-8")
-      body should equal("""[{"name":"scalatraUser"},{"name":"scalatraUser1"},{"name":"scalatraUser2"}]""")
+      body should equal("""[{"name":"scalatraUser1"},{"name":"scalatraUser2"}]""")
     }
   }
 
